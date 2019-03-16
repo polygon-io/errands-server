@@ -1,0 +1,8 @@
+package: github.com/polygon-io/errands-server
+import:
+- package: github.com/dgraph-io/badger
+  version: ^2.0.0-rc1
+- package: github.com/gin-gonic/gin
+  version: ^1.3.0
+- package: gopkg.in/go-playground/validator.v8
+  version: ^8.18.2
