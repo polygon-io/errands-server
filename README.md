@@ -1,5 +1,5 @@
-# errands-server
-Errands API Server. A language agnostic, HTTP based queue 
+# Errands Server
+Errands API Server. A language agnostic, HTTP based queue. Persistant storage using Badger for SSD performance. Concurrency safe for multiple workers to be processing errands off the queue.
 
 #### Formats:
 Current response format:
