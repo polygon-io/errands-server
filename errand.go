@@ -10,19 +10,6 @@ import (
 
 
 
-
-/*
-
-Name
-Type
-TTL
-Retries
-Priority
-Data
-
- */
-
-
 type Errand struct {
 
 	// Marshalling Attributes:
