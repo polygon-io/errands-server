@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"net/http"
 	gin "github.com/gin-gonic/gin"
+	cors "github.com/gin-contrib/cors"
+	gzip "github.com/gin-contrib/gzip"
 	badger "github.com/dgraph-io/badger"
 	binding "github.com/gin-gonic/gin/binding"
 	validator "gopkg.in/go-playground/validator.v8"
@@ -78,6 +80,14 @@ func ( s *ErrandsServer) createAPI(){
 
 	s.API = gin.Default()
 
+	CORSconfig := cors.DefaultConfig()
+	CORSconfig.AllowOriginFunc = func( origin string ) bool {
+		// fmt.Println("Connection from", origin)
+		return true
+	}
+	s.API.Use(cors.New(CORSconfig))
+	s.API.Use(gzip.Gzip(gzip.DefaultCompression))
+
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterStructValidation(UserStructLevelValidation, Errand{})
 	}
@@ -101,6 +111,8 @@ func ( s *ErrandsServer) createAPI(){
 		s.ErrandsRoutes.POST("/", s.createErrand)
 		// Get all errands:
 		s.ErrandsRoutes.GET("/", s.getErrands)
+		// Ready to process an errand:
+		s.ErrandsRoutes.POST("/process", s.processErrand)
 		// Get all errands in a current type or state:
 		s.ErrandsRoutes.GET("/list/:key/:val", s.createErrand)
 		// Update all errands in this state:

@@ -1,5 +1,5 @@
-hash: 68aa4ec9e30aa19a306cdd774d4a35e3894c763277dfd9290871b7fc8b4409aa
-updated: 2019-03-18T13:45:42.056128-04:00
+hash: 3c2f44deeb7eab50680e852d5ec2cb0d6244168be59839358e8bc7840cbc36d0
+updated: 2019-03-18T17:37:13.726757-04:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: e2d15f34fcf99d5dbb871c820ec73f710fca9815
@@ -13,6 +13,10 @@ imports:
   - "y"
 - name: github.com/dgryski/go-farm
   version: 3adb47b1fb0f6d9efcc5051a6c62e2e413ac85a9
+- name: github.com/gin-contrib/cors
+  version: cf4846e6a636a76237a28d9286f163c132e841bc
+- name: github.com/gin-contrib/gzip
+  version: b07653c4b4b188bf0af293ae44b72e7ac9623a17
 - name: github.com/gin-contrib/sse
   version: 5545eab6dad3bbbd6c5ae9186383c2a9d23c0dae
 - name: github.com/gin-gonic/gin
@@ -22,7 +26,7 @@ imports:
   - json
   - render
 - name: github.com/golang/protobuf
-  version: b85cd75de734650db18a99a943fe351d41387800
+  version: d3c38a4eb4970272b87a425ae00ccc4548e2f9bb
   subpackages:
   - proto
 - name: github.com/google/uuid
@@ -47,7 +51,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: a2f829d7f35f2ed1c3520c553a6226495455cae0
+  version: 6c81ef8f67ca3f42fc9cd71dfbd5f35b0c4b5771
   subpackages:
   - unix
 - name: gopkg.in/go-playground/validator.v8

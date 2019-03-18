@@ -3,6 +3,7 @@ package main
 
 
 import (
+	uuid "github.com/google/uuid"
 	gin "github.com/gin-gonic/gin"
 )
 
@@ -12,7 +13,7 @@ import (
 
 type Errand struct {
 
-	// Marshalling Attributes:
+	// General Attributes:
 	ID 				string 		`json:"id"`
 	Name 			string 		`json:"name" binding:"required"`
 	Type 			string 		`json:"type" binding:"required"`
@@ -26,8 +27,30 @@ type Errand struct {
 	Status 			string 		`json:"status,omitempty"`
 
 	// Internal attributes:
-	
+	Progress		int16 		`json:"progress"`
+	Attempts 		int16 		`json:"attempts"`
+	Started			int64 		`json:"started,omitempty"`
+	FailedReason	string 		`json:"failedReason,omitempty"`
 
 }
 
+
+
+func NewErrand() *Errand {
+	obj := &Errand{}
+	obj.setDefaults()
+	return obj
+}
+
+
+
+func ( e *Errand ) setDefaults(){
+	uid := uuid.New()
+	uidText, err := uid.MarshalText(); if err != nil {
+		panic( err )
+	}
+	e.ID = string( uidText )
+	e.Status = "inactive"
+	e.Created = getTimestamp()
+}
 
