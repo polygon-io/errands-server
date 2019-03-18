@@ -1,0 +1,64 @@
+{
+	"info": {
+		"_postman_id": "8f651924-835c-43ec-bc36-f1293093a3da",
+		"name": "Errands",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Errand",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"New Errand Job\",\n\t\"type\": \"backfill\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errands",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errands"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Errands",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errands",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errands"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
