@@ -3,6 +3,7 @@ package main
 
 
 import (
+	"errors"
 	uuid "github.com/google/uuid"
 	gin "github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 
 
 
-
+var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
 type Errand struct {
 
 	// General Attributes:
@@ -33,7 +34,7 @@ type Errand struct {
 	Started			int64 		`json:"started,omitempty"` // Timestamp of last Start
 	Failed			int64 		`json:"failed,omitempty"` // Timestamp of last Fail
 	Completed		int64 		`json:"compelted,omitempty"` // Timestamp of last Fail
-	Logs 			[]Log 		`json:"logs"`
+	Logs 			[]Log 		`json:"logs,omitempty"`
 }
 
 
@@ -67,6 +68,9 @@ func ( e *Errand ) setDefaults(){
 
 
 func ( e *Errand ) addToLogs( severity, message string ) error {
+	if !contains( LogSeverities, severity ) {
+		return errors.New("Invalid log severity")
+	}
 	obj := Log{
 		Severity: severity,
 		Message: message,
@@ -76,3 +80,11 @@ func ( e *Errand ) addToLogs( severity, message string ) error {
 	return nil
 }
 
+func contains(s []string, e string) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
+}

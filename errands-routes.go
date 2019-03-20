@@ -7,6 +7,7 @@ import (
 	"log"
 	"sort"
 	"bytes"
+	"errors"
 	"net/http"
 	"encoding/gob"
 	gin "github.com/gin-gonic/gin"
@@ -48,6 +49,9 @@ func ( s *ErrandsServer ) createErrand( c *gin.Context ){
 
 
 func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *Errand ) error {
+	if !contains(ErrandStatuses, errand.Status) {
+		return errors.New("Invalid errand status state")
+	}
 	var bytesBuffer bytes.Buffer
 	enc := gob.NewEncoder(&bytesBuffer)
 	err := enc.Encode( errand ); if err != nil {

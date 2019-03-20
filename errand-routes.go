@@ -83,6 +83,7 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 		}
 		errand.Failed = getTimestamp()
 		errand.Status = "failed"
+		errand.Progress = 0
 		if errand.Options.Retries > 0 {
 			// If we should retry this errand:
 			if errand.Attempts <= errand.Options.Retries {
@@ -120,7 +121,7 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 			return err
 		}
 		errand.Completed = getTimestamp()
-		errand.Status = "complete"
+		errand.Status = "completed"
 		errand.Progress = 100
 		// If we should delete this errand upon completion:
 		if errand.Options.DeleteOnCompleted == true {
