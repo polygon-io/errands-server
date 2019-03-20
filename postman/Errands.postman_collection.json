@@ -127,6 +127,64 @@
 			"response": []
 		},
 		{
+			"name": "Get Filtered Errands",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6c5b1ca0-0441-43c4-91c3-68f0e3fda5b8",
+						"exec": [
+							"var schema = {",
+							"    type: \"object\",",
+							"    properties: {",
+							"        status: {",
+							"            type: \"string\"",
+							"        },",
+							"        results: {",
+							"            type: \"array\",",
+							"            items: {",
+							"                $ref: \"errand\",",
+							"            }",
+							"        }",
+							"    }",
+							"};",
+							"pm.test(\"Status code is 200\", function (){ ",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Schema is valid', function() {",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errands/list/status/inactive",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errands",
+						"list",
+						"status",
+						"inactive"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Process Errand - Start",
 			"event": [
 				{
@@ -507,6 +565,67 @@
 			"response": []
 		},
 		{
+			"name": "Update All Errands ( filtered )",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e243f842-ec20-43f2-a7a9-a568b8251109",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"var schema = {",
+							"    type: \"object\",",
+							"    properties: {",
+							"        status: {",
+							"            type: \"string\"",
+							"        },",
+							"        count: \"number\"",
+							"    }",
+							"};",
+							"pm.test(\"Status code is 200\", function (){ ",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Schema is valid', function() {",
+							"    pm.expect(tv4.validate(jsonData, schema)).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"status\": \"inactive\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errands/update/status/active",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errands",
+						"update",
+						"status",
+						"active"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Delete Errand",
 			"event": [
 				{
@@ -607,7 +726,7 @@
 	],
 	"variable": [
 		{
-			"id": "291d10f1-3d30-4b0a-81bd-1cec4032401f",
+			"id": "28d42a29-c19c-4e20-beae-a96c7a552bd0",
 			"key": "errand",
 			"value": "ERRAND_ID",
 			"type": "string"

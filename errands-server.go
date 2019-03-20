@@ -119,13 +119,13 @@ func ( s *ErrandsServer) createAPI(){
 		// Create a new errand:
 		s.ErrandsRoutes.POST("/", s.createErrand)
 		// Get all errands:
-		s.ErrandsRoutes.GET("/", s.getErrands)
+		s.ErrandsRoutes.GET("/", s.getAllErrands)
 		// Ready to process an errand:
 		s.ErrandsRoutes.POST("/process", s.processErrand)
 		// Get all errands in a current type or state:
-		s.ErrandsRoutes.GET("/list/:key/:val", s.createErrand)
+		s.ErrandsRoutes.GET("/list/:key/:val", s.getFilteredErrands)
 		// Update all errands in this state:
-		s.ErrandsRoutes.POST("/update/:type", s.createErrand)
+		s.ErrandsRoutes.POST("/update/:key/:val", s.updateFilteredErrands)
 	}
 
 	s.Server = &http.Server{

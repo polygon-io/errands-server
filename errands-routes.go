@@ -63,8 +63,10 @@ func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *Errand ) error {
 
 
 
-func ( s *ErrandsServer ) getErrands( c *gin.Context ){
-	errands, err := s.GetErrandsBy()
+func ( s *ErrandsServer ) getAllErrands( c *gin.Context ){
+	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+		return true
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error!",
@@ -75,6 +77,94 @@ func ( s *ErrandsServer ) getErrands( c *gin.Context ){
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": errands,
+	})
+}
+
+
+
+func ( s *ErrandsServer ) getFilteredErrands( c *gin.Context ){
+	key := c.Param("key")
+	value := c.Param("val")
+	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+		switch key {
+		case "status":
+			return ( errand.Status == value )
+		case "type":
+			return ( errand.Type == value )
+		default:
+			return false
+		}
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error!",
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": "OK",
+		"results": errands,
+	})
+}
+
+
+
+
+type filteredUpdateReq struct {
+	Status 			string 		`json:"status"`
+	Delete 			bool 		`json:"delete"`
+}
+func ( s *ErrandsServer ) updateFilteredErrands( c *gin.Context ){
+	key := c.Param("key")
+	value := c.Param("val")
+	var updateReq filteredUpdateReq
+	if err := c.ShouldBind(&updateReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Parameters",
+			"error": err.Error(),
+		})
+		return
+	}
+	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+		switch key {
+		case "status":
+			return ( errand.Status == value )
+		case "type":
+			return ( errand.Type == value )
+		default:
+			return false
+		}
+	})
+	if err == nil {
+		for _, errand := range errands {
+			if updateReq.Delete == true {
+				err = s.deleteErrandByID( errand.ID ); if err != nil {
+					break
+				}
+			}else {
+				if updateReq.Status != "" {
+					_, err = s.UpdateErrandByID( errand.ID, func( e *Errand ) error {
+						e.Status = updateReq.Status
+						return nil
+					})
+					if err != nil {
+						break
+					}
+				}
+			}
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error!",
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": "OK",
+		"count": len( errands ),
 	})
 }
 
@@ -171,9 +261,8 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 
 
 
-func ( s *ErrandsServer ) GetErrandsBy() ( []Errand, error ) {
-
-	errands := []Errand{}
+func ( s *ErrandsServer ) GetErrandsBy( fn func ( *Errand ) bool ) ( []*Errand, error ) {
+	errands := make([]*Errand, 0)
 	err := s.DB.View(func( txn *badger.Txn ) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 50
@@ -191,7 +280,9 @@ func ( s *ErrandsServer ) GetErrandsBy() ( []Errand, error ) {
 				err = dec.Decode( &errand ); if err != nil {
 					return err
 				}
-				errands = append( errands, errand )
+				if( fn( &errand ) ){
+					errands = append( errands, &errand )
+				}
 				return nil
 			})
 			if err != nil {
@@ -200,9 +291,7 @@ func ( s *ErrandsServer ) GetErrandsBy() ( []Errand, error ) {
 		}
 		return nil
 	})
-
 	return errands, err
-
 }
 
 
