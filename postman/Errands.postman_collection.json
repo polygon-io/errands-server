@@ -565,6 +565,46 @@
 			"response": []
 		},
 		{
+			"name": "Delete Errand",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eb78c88a-144b-47ef-a34e-11f1a52816ad",
+						"exec": [
+							"pm.test(\"Status code is 200\", function (){ ",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/{{errand_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"{{errand_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update All Errands ( filtered )",
 			"event": [
 				{
@@ -620,46 +660,6 @@
 						"update",
 						"status",
 						"active"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete Errand",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "eb78c88a-144b-47ef-a34e-11f1a52816ad",
-						"exec": [
-							"pm.test(\"Status code is 200\", function (){ ",
-							"    pm.response.to.have.status(200);",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://localhost:5555/v1/errand/{{errand_id}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5555",
-					"path": [
-						"v1",
-						"errand",
-						"{{errand_id}}"
 					]
 				}
 			},
@@ -726,7 +726,7 @@
 	],
 	"variable": [
 		{
-			"id": "28d42a29-c19c-4e20-beae-a96c7a552bd0",
+			"id": "0d6d657d-4625-47e6-adcf-16aab5e3d107",
 			"key": "errand",
 			"value": "ERRAND_ID",
 			"type": "string"
