@@ -128,8 +128,11 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 			// We are processing this errand:
 			procErrand.Started = getTimestamp()
 			procErrand.Attempts += 1
-			procErrand.FailedReason = ""
 			procErrand.Status = "active"
+			procErrand.Progress = 0.0
+			if err := procErrand.addToLogs("INFO", "Started!"); err != nil {
+				return err
+			}
 			err := s.saveErrand( txn, procErrand ); if err != nil {
 				return err
 			}

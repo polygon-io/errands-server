@@ -1,5 +1,5 @@
-hash: 3c2f44deeb7eab50680e852d5ec2cb0d6244168be59839358e8bc7840cbc36d0
-updated: 2019-03-18T17:37:13.726757-04:00
+hash: 726601405908e01023f1c1b7c499c6d95d06075079bd60beaf2934f00644913c
+updated: 2019-03-19T23:11:55.780968-04:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: e2d15f34fcf99d5dbb871c820ec73f710fca9815
@@ -33,6 +33,8 @@ imports:
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/json-iterator/go
   version: 0ff49de124c6f76f8494e194af75bde0f1a49a29
+- name: github.com/kelseyhightower/envconfig
+  version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/mattn/go-isatty
   version: c2a7a6ca930a4cd0bc33a3f298eb71960732a3a7
 - name: github.com/modern-go/concurrent
@@ -46,7 +48,7 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: 9f648a60d9775ef5c977e7669d1673a7a67bef33
+  version: d196dffd7c2beec1957382065df08bcc353b9706
   subpackages:
   - internal/timeseries
   - trace

@@ -19,7 +19,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"New Errand Job\",\n\t\"type\": \"backfill\"\n}"
+					"raw": "{\n\t\"name\": \"Process: Banner Ads v1\",\n\t\"type\": \"sv-extract\",\n\t\"options\": {\n\t\t\"ttl\": 60\n\t},\n\t\"data\": {\n\t\t\"file\":\"http://s3.stackdot.com/some/dir/file.sketch\",\n\t\t\"user\": \"351351345151\",\n\t\t\"dbid\": \"899687969\"\n\t}\n}"
 				},
 				"url": {
 					"raw": "http://localhost:5555/v1/errands",
@@ -55,6 +55,212 @@
 					"path": [
 						"v1",
 						"errands"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Process Errand - Start",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errands/process?type=extract",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errands",
+						"process"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "extract"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log to Errand",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"severity\": \"INFO\",\n\t\"message\": \"This is an update to the log of this errand..\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/4cb28beb-b9e9-4be5-a5f9-bc5f45293899/log",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"4cb28beb-b9e9-4be5-a5f9-bc5f45293899",
+						"log"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Errand",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"progress\": 98.789\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/1a06e794-fd7f-41c7-a653-6836bdbc92c6",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"1a06e794-fd7f-41c7-a653-6836bdbc92c6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fail Errand",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"reason\": \"Error processing this errand. Processing failed at line 101:42\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/84672beb-f5bd-490e-978e-3236c44f4a82/failed",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"84672beb-f5bd-490e-978e-3236c44f4a82",
+						"failed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Errand",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/a3e7de15-a79b-4598-9439-1cb560280ddb",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"a3e7de15-a79b-4598-9439-1cb560280ddb"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Complete Errand",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/a3e7de15-a79b-4598-9439-1cb560280ddb/completed",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"a3e7de15-a79b-4598-9439-1cb560280ddb",
+						"completed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retry Errand",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:5555/v1/errand/cbbea3f6-3315-49e0-be42-9b4cbc5949f8/retry",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5555",
+					"path": [
+						"v1",
+						"errand",
+						"cbbea3f6-3315-49e0-be42-9b4cbc5949f8",
+						"retry"
 					]
 				}
 			},

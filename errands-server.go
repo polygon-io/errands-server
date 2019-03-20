@@ -22,6 +22,8 @@ import (
 
 
 type ErrandsServer struct {
+	StorageDir 			string
+	Port 				string
 	DB 					*badger.DB
 	Server 				*http.Server
 	API 				*gin.Engine
@@ -31,8 +33,11 @@ type ErrandsServer struct {
 
 
 
-func NewErrandsServer() *ErrandsServer {
-	obj := &ErrandsServer{}
+func NewErrandsServer( cfg *Config ) *ErrandsServer {
+	obj := &ErrandsServer{
+		StorageDir: cfg.Storage,
+		Port: cfg.Port,
+	}
 	go obj.createAPI()
 	obj.createDB()
 	return obj
@@ -67,8 +72,8 @@ func UserStructLevelValidation(v *validator.Validate, structLevel *validator.Str
 
 func ( s *ErrandsServer ) createDB(){
 	opts := badger.DefaultOptions
-	opts.Dir = "./badger"
-	opts.ValueDir = "./badger"
+	opts.Dir = s.StorageDir
+	opts.ValueDir = s.StorageDir
 	var err error
 	s.DB, err = badger.Open( opts ); if err != nil {
 		log.Fatal( err )
@@ -98,9 +103,13 @@ func ( s *ErrandsServer) createAPI(){
 		// Get an errand by id:
 		s.ErrandRoutes.GET("/:id", s.createErrand)
 		// Delete an errand by id:
-		s.ErrandRoutes.DELETE("/:id", s.createErrand)
+		s.ErrandRoutes.DELETE("/:id", s.deleteErrand)
 		// Update an errand by id:
-		s.ErrandRoutes.PATCH("/:id", s.createErrand)
+		s.ErrandRoutes.PUT("/:id", s.updateErrand)
+		s.ErrandRoutes.PUT("/:id/failed", s.failedErrand)
+		s.ErrandRoutes.PUT("/:id/completed", s.completeErrand)
+		s.ErrandRoutes.POST("/:id/log", s.logToErrand)
+		s.ErrandRoutes.POST("/:id/retry", s.retryErrand)
 	}
 
 
@@ -120,11 +129,11 @@ func ( s *ErrandsServer) createAPI(){
 	}
 
 	s.Server = &http.Server{
-		Addr: 		":5555",
+		Addr: 		s.Port,
 		Handler: 	s.API,
 	}
 
-	log.Println("Starting server on port: 5555")
+	log.Println("Starting server on port:", s.Port)
 	if err := s.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("listen: %s\n", err)
 	}
