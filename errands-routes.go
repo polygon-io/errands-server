@@ -3,9 +3,11 @@ package main
 
 
 import (
+	// "io"
 	// "fmt"
 	"log"
 	"sort"
+	// "time"
 	"bytes"
 	"errors"
 	"net/http"
@@ -13,6 +15,23 @@ import (
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
 )
+
+
+
+
+
+func ( s *ErrandsServer ) errandNotifications( c *gin.Context ){
+	client := s.NewClient( c )
+	clientGone := client.Gin.Writer.CloseNotify()
+	for {
+		<- clientGone
+		client.Gone()
+	}
+}
+
+
+
+
 
 
 
@@ -177,7 +196,7 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 	var procErrand *Errand
 	errands := make([]*Errand, 0)
 	hasFound := false
-	typeFilter := c.Query("type")
+	typeFilter := c.Param("type")
 	err := s.DB.Update(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 50

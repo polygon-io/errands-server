@@ -25,7 +25,7 @@ import (
  */
 var cfg Config
 type Config struct {
-	Storage 			string 	`split_words:"true" default:"./badger"`
+	Storage 			string 	`split_words:"true" default:"./errands"`
 	Port 				string 	`split_words:"true" default:":5555"`
 }
 

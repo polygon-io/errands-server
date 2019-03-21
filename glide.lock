@@ -1,5 +1,5 @@
 hash: 726601405908e01023f1c1b7c499c6d95d06075079bd60beaf2934f00644913c
-updated: 2019-03-19T23:11:55.780968-04:00
+updated: 2019-03-21T00:49:10.246016-04:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: e2d15f34fcf99d5dbb871c820ec73f710fca9815
@@ -44,11 +44,11 @@ imports:
 - name: github.com/pkg/errors
   version: 27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7
 - name: github.com/ugorji/go
-  version: e2bddce071ad291da59c7e1e52cfd910240c6b38
+  version: 2dc34c0b87808deb8e2c69e1625db4c14e5d0d4a
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: d196dffd7c2beec1957382065df08bcc353b9706
+  version: 1272bf9dcd53ea65c09668fb4c76e65deb740072
   subpackages:
   - internal/timeseries
   - trace

@@ -99,6 +99,7 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "failed", updatedErrand )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": updatedErrand,
@@ -139,6 +140,7 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "completed", updatedErrand )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": updatedErrand,

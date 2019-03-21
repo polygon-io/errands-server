@@ -8,7 +8,7 @@ import (
 	"net/http"
 	gin "github.com/gin-gonic/gin"
 	cors "github.com/gin-contrib/cors"
-	gzip "github.com/gin-contrib/gzip"
+	// gzip "github.com/gin-contrib/gzip"
 	badger "github.com/dgraph-io/badger"
 	binding "github.com/gin-gonic/gin/binding"
 	validator "gopkg.in/go-playground/validator.v8"
@@ -21,6 +21,12 @@ import (
 
 
 
+type Notification struct {
+	Event 				string 		`json:"event"`
+	Errand 				Errand 		`json:"errand"`
+}
+
+
 type ErrandsServer struct {
 	StorageDir 			string
 	Port 				string
@@ -29,7 +35,14 @@ type ErrandsServer struct {
 	API 				*gin.Engine
 	ErrandsRoutes 		*gin.RouterGroup
 	ErrandRoutes 		*gin.RouterGroup
+	Notifications 		chan *Notification
+	StreamClients 		[]*Client
+	RegisterClient 		chan *Client
+	UnregisterClient 	chan *Client
 }
+
+
+
 
 
 
@@ -37,10 +50,44 @@ func NewErrandsServer( cfg *Config ) *ErrandsServer {
 	obj := &ErrandsServer{
 		StorageDir: cfg.Storage,
 		Port: cfg.Port,
+		StreamClients: make([]*Client, 0 ),
+		RegisterClient: make( chan *Client, 10 ),
+		UnregisterClient: make( chan *Client, 10 ),
+		Notifications: make(chan *Notification, 100),
 	}
 	go obj.createAPI()
+	go obj.broadcastLoop()
 	obj.createDB()
 	return obj
+}
+
+func ( s *ErrandsServer ) AddNotification( event string, errand *Errand ){
+	obj := &Notification{
+		Event: event,
+		Errand: *errand,
+	}
+	s.Notifications <- obj
+}
+
+func ( s *ErrandsServer ) broadcastLoop(){
+	for {
+		select {
+		case client := <- s.RegisterClient:
+			s.StreamClients = append( s.StreamClients, client )
+		case client := <- s.UnregisterClient:
+			for i, c := range s.StreamClients {
+				if c == client {
+					s.StreamClients = append(s.StreamClients[:i], s.StreamClients[i+1:]...)
+				}
+			}
+		case not := <- s.Notifications:
+			for _, client := range s.StreamClients {
+				notificationCopy := &Notification{}
+				*notificationCopy = *not
+				client.Notifications <- notificationCopy
+			}
+		}
+	}
 }
 
 
@@ -91,7 +138,7 @@ func ( s *ErrandsServer) createAPI(){
 		return true
 	}
 	s.API.Use(cors.New(CORSconfig))
-	s.API.Use(gzip.Gzip(gzip.DefaultCompression))
+	// s.API.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterStructValidation(UserStructLevelValidation, Errand{})
@@ -120,8 +167,10 @@ func ( s *ErrandsServer) createAPI(){
 		s.ErrandsRoutes.POST("/", s.createErrand)
 		// Get all errands:
 		s.ErrandsRoutes.GET("/", s.getAllErrands)
+		// Notifications:
+		s.ErrandsRoutes.GET("/notifications", s.errandNotifications)
 		// Ready to process an errand:
-		s.ErrandsRoutes.POST("/process", s.processErrand)
+		s.ErrandsRoutes.POST("/process/:type", s.processErrand)
 		// Get all errands in a current type or state:
 		s.ErrandsRoutes.GET("/list/:key/:val", s.getFilteredErrands)
 		// Update all errands in this state:
