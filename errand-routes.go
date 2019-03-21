@@ -4,10 +4,8 @@ package main
 
 import (
 	// "fmt"
-	"bytes"
 	"errors"
 	"net/http"
-	"encoding/gob"
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
 )
@@ -111,7 +109,7 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 
 
 type CompletedRequest struct {
-	Results 			string 	`json:"results"`
+	Results 			*gin.H 	`json:"results"`
 }
 func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 	var updatedErrand *Errand
@@ -268,21 +266,16 @@ func ( s *ErrandsServer ) UpdateErrandByID( id string, fn func( *Errand ) error 
 		item, err := txn.Get([]byte( id )); if err != nil {
 			return err
 		}
-		err = item.Value(func(val []byte) error {
-			var bytesBuffer bytes.Buffer
-			dec := gob.NewDecoder( &bytesBuffer )
-			_, err := bytesBuffer.Write( val ); if err != nil {
+		err = item.Value(func(v []byte) error {
+			errand := &Errand{}
+			err := errand.UnmarshalJSON( v ); if err != nil {
 				return err
 			}
-			var errand Errand
-			err = dec.Decode( &errand ); if err != nil {
+			err = fn( errand ); if err != nil {
 				return err
 			}
-			err = fn( &errand ); if err != nil {
-				return err
-			}
-			updatedErrand = &errand
-			err = s.saveErrand( txn, &errand ); if err != nil {
+			updatedErrand = errand
+			err = s.saveErrand( txn, errand ); if err != nil {
 				return err
 			}
 			return nil

@@ -1,5 +1,5 @@
-hash: 726601405908e01023f1c1b7c499c6d95d06075079bd60beaf2934f00644913c
-updated: 2019-03-21T00:49:10.246016-04:00
+hash: 611257d7204466869e78430a6fab8478dc479dcef4721262a9c16cb45e61710d
+updated: 2019-03-21T13:54:02.935666-04:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: e2d15f34fcf99d5dbb871c820ec73f710fca9815
@@ -35,6 +35,8 @@ imports:
   version: 0ff49de124c6f76f8494e194af75bde0f1a49a29
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
+- name: github.com/mailru/easyjson
+  version: 1de009706dbeb9d05f18586f0735fcdb7c524481
 - name: github.com/mattn/go-isatty
   version: c2a7a6ca930a4cd0bc33a3f298eb71960732a3a7
 - name: github.com/modern-go/concurrent
@@ -53,7 +55,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: 6c81ef8f67ca3f42fc9cd71dfbd5f35b0c4b5771
+  version: f7bb7a8bee54210937e93ec56d007d892c1f0580
   subpackages:
   - unix
 - name: gopkg.in/go-playground/validator.v8

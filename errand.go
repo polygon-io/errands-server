@@ -12,6 +12,7 @@ import (
 
 
 var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
+//easyjson:json
 type Errand struct {
 
 	// General Attributes:
@@ -27,7 +28,7 @@ type Errand struct {
 	Data 			*gin.H 		`json:"data,omitempty"`
 	Created 		int64 		`json:"created"`
 	Status 			string 		`json:"status,omitempty"`
-	Results 		string 		`json:"results,omitempty"`
+	Results 		*gin.H 		`json:"results,omitempty"`
 
 	// Internal attributes:
 	Progress		float64 	`json:"progress"`
@@ -40,6 +41,7 @@ type Errand struct {
 
 
 var LogSeverities []string = []string{ "INFO", "WARNING", "ERROR" }
+//easyjson:json
 type Log struct {
 	Severity 		string 		`json:"severity" binding:"required"`
 	Message 		string 		`json:"message" binding:"required"`

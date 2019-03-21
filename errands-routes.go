@@ -8,10 +8,8 @@ import (
 	"log"
 	"sort"
 	// "time"
-	"bytes"
 	"errors"
 	"net/http"
-	"encoding/gob"
 	"encoding/json"
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
@@ -103,12 +101,10 @@ func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *Errand ) error {
 	if !contains(ErrandStatuses, errand.Status) {
 		return errors.New("Invalid errand status state")
 	}
-	var bytesBuffer bytes.Buffer
-	enc := gob.NewEncoder(&bytesBuffer)
-	err := enc.Encode( errand ); if err != nil {
+	bytes, err := errand.MarshalJSON(); if err != nil {
 		return err
 	}
-	return txn.Set([]byte(errand.ID), bytesBuffer.Bytes())
+	return txn.Set([]byte(errand.ID), bytes)
 }
 
 
@@ -237,15 +233,12 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			err := item.Value(func( v []byte ) error {
-				var bytesBuffer bytes.Buffer
-				dec := gob.NewDecoder( &bytesBuffer )
-				_, err := bytesBuffer.Write( v ); if err != nil {
+
+				errand := &Errand{}
+				err := errand.UnmarshalJSON( v ); if err != nil {
 					return err
 				}
-				var errand Errand
-				err = dec.Decode( &errand ); if err != nil {
-					return err
-				}
+
 				if errand.Status != "inactive" {
 					return nil
 				}
@@ -253,7 +246,7 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 					return nil
 				}
 				// Add to list of errands we could possibly process:
-				errands = append( errands, &errand )
+				errands = append( errands, errand )
 				return nil
 			})
 			if err != nil {
@@ -323,17 +316,12 @@ func ( s *ErrandsServer ) GetErrandsBy( fn func ( *Errand ) bool ) ( []*Errand, 
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			err := item.Value(func( v []byte ) error {
-				var bytesBuffer bytes.Buffer
-				dec := gob.NewDecoder( &bytesBuffer )
-				_, err := bytesBuffer.Write( v ); if err != nil {
+				errand := &Errand{}
+				err := errand.UnmarshalJSON( v ); if err != nil {
 					return err
 				}
-				var errand Errand
-				err = dec.Decode( &errand ); if err != nil {
-					return err
-				}
-				if( fn( &errand ) ){
-					errands = append( errands, &errand )
+				if( fn( errand ) ){
+					errands = append( errands, errand )
 				}
 				return nil
 			})

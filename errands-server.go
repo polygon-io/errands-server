@@ -21,7 +21,7 @@ import (
 
 
 
-
+//easyjson:json
 type Notification struct {
 	Event 				string 		`json:"event"`
 	Errand 				Errand 		`json:"errand,omitempty"`
