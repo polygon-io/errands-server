@@ -110,9 +110,19 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 
 
 
-
+type CompletedRequest struct {
+	Results 			string 	`json:"results"`
+}
 func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 	var updatedErrand *Errand
+	var compReq CompletedRequest
+	if err := c.ShouldBind(&compReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Parameters",
+			"error": err.Error(),
+		})
+		return
+	}
 	shouldDelete := false
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
 		// if errand.Status != "active" {
@@ -125,6 +135,7 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 		errand.Completed = getTimestamp()
 		errand.Status = "completed"
 		errand.Progress = 100
+		errand.Results = compReq.Results
 		// If we should delete this errand upon completion:
 		if errand.Options.DeleteOnCompleted == true {
 			shouldDelete = true

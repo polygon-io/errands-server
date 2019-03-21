@@ -27,6 +27,7 @@ type Errand struct {
 	Data 			*gin.H 		`json:"data,omitempty"`
 	Created 		int64 		`json:"created"`
 	Status 			string 		`json:"status,omitempty"`
+	Results 		string 		`json:"results,omitempty"`
 
 	// Internal attributes:
 	Progress		float64 	`json:"progress"`
