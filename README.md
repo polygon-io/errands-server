@@ -1,5 +1,5 @@
 # Errands Server
-Errands API Server. A language agnostic, HTTP based queue. Persistant storage using Badger for SSD performance. Concurrency safe for multiple workers to be processing errands off the queue.
+Errands API Server. A language agnostic, HTTP based queue with server side events ( SSE ). Persistant storage using Badger for SSD performance. Concurrency safe for multiple workers to be processing errands off the queue.
 
 ## Optional Params:
 Errands server uses environment variables as a way to configure optional config params, here they are:
@@ -8,6 +8,10 @@ Errands server uses environment variables as a way to configure optional config 
 
 ## Running:
 See the `postman` folder for the PostMan Collection which contains examples and tests for all the possible routes. 
+
+You can run the API locally with docker:
+
+	docker run -p 5555:5555 polygonio/errands-server
 
 ## Push Events
 There is an endpoint which will push server side events ( SSE ) to the client when changes happen on the errands server.
