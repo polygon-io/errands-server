@@ -49,6 +49,7 @@ func ( s *ErrandsServer ) updateErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "updated", updatedErrand )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": updatedErrand,
@@ -74,9 +75,9 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 		return
 	}
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
-		if errand.Status != "active" {
-			return errors.New("Errand must be in active state to fail")
-		}
+		// if errand.Status != "active" {
+		// 	return errors.New("Errand must be in active state to fail")
+		// }
 		// Update this errand attributes:
 		if err := errand.addToLogs("ERROR", failedReq.Reason); err != nil {
 			return err
@@ -114,9 +115,9 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 	var updatedErrand *Errand
 	shouldDelete := false
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
-		if errand.Status != "active" {
-			return errors.New("Errand must be in active state to complete")
-		}
+		// if errand.Status != "active" {
+		// 	return errors.New("Errand must be in active state to complete")
+		// }
 		// Update this errand attributes:
 		if err := errand.addToLogs("INFO", "Completed!"); err != nil {
 			return err
@@ -173,6 +174,7 @@ func ( s *ErrandsServer ) retryErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "retry", updatedErrand )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": updatedErrand,

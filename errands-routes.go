@@ -3,7 +3,7 @@ package main
 
 
 import (
-	// "io"
+	"io"
 	// "fmt"
 	"log"
 	"sort"
@@ -12,6 +12,7 @@ import (
 	"errors"
 	"net/http"
 	"encoding/gob"
+	"encoding/json"
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
 )
@@ -21,12 +22,42 @@ import (
 
 
 func ( s *ErrandsServer ) errandNotifications( c *gin.Context ){
-	client := s.NewClient( c )
-	clientGone := client.Gin.Writer.CloseNotify()
-	for {
-		<- clientGone
-		client.Gone()
+	client, err := s.NewClient( c ); if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error Creating Subscription",
+			"error":   err.Error(),
+		})
+		return	
 	}
+	w := client.Gin.Writer
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	clientGone := client.Gin.Writer.CloseNotify()
+
+	client.Gin.Stream(func(wr io.Writer) bool {
+		for {
+			select {
+			case <- clientGone:
+				client.Gone()
+				return false
+			case t, ok := <-client.Notifications:
+				if ok {
+					// If we are subscribed to this event type:
+					if contains(client.EventSubs, t.Event) || client.EventSubs[0] == "*" {
+						jsonData, _ := json.Marshal( t )
+						client.Gin.SSEvent("message", string( jsonData ))
+						w.Flush()
+					}
+					return true
+				}
+				return false
+			}
+		}
+		return false
+	})
 }
 
 
@@ -59,6 +90,7 @@ func ( s *ErrandsServer ) createErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "created", &item )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": item,
@@ -267,6 +299,7 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 		})
 		return
 	}
+	s.AddNotification( "processing", procErrand )
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"results": procErrand,

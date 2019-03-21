@@ -4,6 +4,7 @@ package main
 
 import (
 	"log"
+	// "time"
 	"reflect"
 	"net/http"
 	gin "github.com/gin-gonic/gin"
@@ -23,7 +24,7 @@ import (
 
 type Notification struct {
 	Event 				string 		`json:"event"`
-	Errand 				Errand 		`json:"errand"`
+	Errand 				Errand 		`json:"errand,omitempty"`
 }
 
 
@@ -70,6 +71,14 @@ func ( s *ErrandsServer ) AddNotification( event string, errand *Errand ){
 }
 
 func ( s *ErrandsServer ) broadcastLoop(){
+	// go func(){
+	// 	for {
+	// 		s.Notifications <- &Notification{
+	// 			Event: "heartbeat",
+	// 		}
+	// 		time.Sleep(2 * time.Second)
+	// 	}
+	// }()
 	for {
 		select {
 		case client := <- s.RegisterClient:
@@ -93,6 +102,9 @@ func ( s *ErrandsServer ) broadcastLoop(){
 
 func ( s *ErrandsServer ) kill(){
 	s.killAPI()
+	for _, client := range s.StreamClients {
+		client.Gone()
+	}
 	s.killDB()
 }
 func ( s *ErrandsServer) killAPI(){

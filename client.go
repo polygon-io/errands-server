@@ -3,8 +3,10 @@ package main
 
 
 import (
-	"io"
-	"encoding/json"
+	// "io"
+	"errors"
+	"strings"
+	// "encoding/json"
 	gin "github.com/gin-gonic/gin"
 )
 
@@ -16,9 +18,10 @@ import (
 
 
 type Client struct {
-	ErrandsServer 		*ErrandsServer
-	Notifications 		chan *Notification
-	Gin 				*gin.Context
+	ErrandsServer 			*ErrandsServer
+	Notifications 			chan *Notification
+	Gin 					*gin.Context
+	EventSubs 				[]string
 }
 
 func ( s *ErrandsServer ) RemoveClient( c *Client ){
@@ -26,43 +29,23 @@ func ( s *ErrandsServer ) RemoveClient( c *Client ){
 	s.UnregisterClient <- c
 }
 
-func ( s *ErrandsServer ) NewClient( c *gin.Context ) *Client {
+func ( s *ErrandsServer ) NewClient( c *gin.Context ) ( *Client, error ) {
 	obj := &Client{
 		Notifications: make(chan *Notification, 10),
 		ErrandsServer: s,
 		Gin: c,
 	}
-	
+	events := c.DefaultQuery("events", "*")
+	obj.EventSubs = strings.Split(events, ",")
+	if len( obj.EventSubs ) < 1 {
+		return obj, errors.New("Must have at least 1 event subscription")
+	}
 	s.RegisterClient <- obj
-	go obj.Broadcaster()
-	return obj
+	return obj, nil
 }
 
 func ( c *Client ) Gone(){
 	c.ErrandsServer.RemoveClient( c )
 }
-
-func ( c *Client ) Broadcaster(){
-	w := c.Gin.Writer
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("X-Accel-Buffering", "no")
-
-	// clientGone := w.CloseNotify()
-	c.Gin.Stream(func(wr io.Writer) bool {
-		for {
-			select {
-			case t := <-c.Notifications:
-				jsonData, _ := json.Marshal( t )
-				c.Gin.SSEvent("message", string( jsonData ))
-				w.Flush()
-				return true
-			}
-		}
-		return false
-	})
-}
-
 
 
