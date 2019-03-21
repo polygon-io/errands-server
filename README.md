@@ -1,6 +1,10 @@
 # Errands Server
 Errands API Server. A language agnostic, HTTP based queue with server side events ( SSE ). Persistant storage using Badger for SSD performance. Concurrency safe for multiple workers to be processing errands off the queue.
 
+## Client Libraries
+- JS - https://github.com/polygon-io/errands-js
+- Go - https://github.com/polygon-io/errands-go
+
 ## Optional Params:
 Errands server uses environment variables as a way to configure optional config params, here they are:
 - `ERRANDS_PORT=:4545` - Will change the listening port to 4545
