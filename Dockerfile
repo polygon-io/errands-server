@@ -1,6 +1,6 @@
 # Step #1
 FROM golang as firststage
-WORKDIR /work
+WORKDIR /go/src/github.com/polygon-io/errands-server
 ADD . .
 # RUN go test ./...
 RUN go get
@@ -13,5 +13,5 @@ FROM alpine:latest
 ENV TZ=America/New_York
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=firststage /work/errands-server .
+COPY --from=firststage /go/src/github.com/polygon-io/errands-server/errands-server .
 CMD ["./errands-server"]
