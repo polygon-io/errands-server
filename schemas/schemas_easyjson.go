@@ -4,7 +4,6 @@ package schemas
 
 import (
 	json "encoding/json"
-	gin "github.com/gin-gonic/gin"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -143,36 +142,28 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 		case "data":
 			if in.IsNull() {
 				in.Skip()
-				out.Data = nil
 			} else {
-				if out.Data == nil {
-					out.Data = new(gin.H)
-				}
-				if in.IsNull() {
-					in.Skip()
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.Data = make(map[string]interface{})
 				} else {
-					in.Delim('{')
-					if !in.IsDelim('}') {
-						*out.Data = make(gin.H)
-					} else {
-						*out.Data = nil
-					}
-					for !in.IsDelim('}') {
-						key := string(in.String())
-						in.WantColon()
-						var v1 interface{}
-						if m, ok := v1.(easyjson.Unmarshaler); ok {
-							m.UnmarshalEasyJSON(in)
-						} else if m, ok := v1.(json.Unmarshaler); ok {
-							_ = m.UnmarshalJSON(in.Raw())
-						} else {
-							v1 = in.Interface()
-						}
-						(*out.Data)[key] = v1
-						in.WantComma()
-					}
-					in.Delim('}')
+					out.Data = nil
 				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v1 interface{}
+					if m, ok := v1.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v1.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v1 = in.Interface()
+					}
+					(out.Data)[key] = v1
+					in.WantComma()
+				}
+				in.Delim('}')
 			}
 		case "created":
 			out.Created = int64(in.Int64())
@@ -181,36 +172,28 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 		case "results":
 			if in.IsNull() {
 				in.Skip()
-				out.Results = nil
 			} else {
-				if out.Results == nil {
-					out.Results = new(gin.H)
-				}
-				if in.IsNull() {
-					in.Skip()
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.Results = make(map[string]interface{})
 				} else {
-					in.Delim('{')
-					if !in.IsDelim('}') {
-						*out.Results = make(gin.H)
-					} else {
-						*out.Results = nil
-					}
-					for !in.IsDelim('}') {
-						key := string(in.String())
-						in.WantColon()
-						var v2 interface{}
-						if m, ok := v2.(easyjson.Unmarshaler); ok {
-							m.UnmarshalEasyJSON(in)
-						} else if m, ok := v2.(json.Unmarshaler); ok {
-							_ = m.UnmarshalJSON(in.Raw())
-						} else {
-							v2 = in.Interface()
-						}
-						(*out.Results)[key] = v2
-						in.WantComma()
-					}
-					in.Delim('}')
+					out.Results = nil
 				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v2 interface{}
+					if m, ok := v2.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v2.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v2 = in.Interface()
+					}
+					(out.Results)[key] = v2
+					in.WantComma()
+				}
+				in.Delim('}')
 			}
 		case "progress":
 			out.Progress = float64(in.Float64())
@@ -299,7 +282,7 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 		}
 		easyjson2189435aEncode(out, in.Options)
 	}
-	if in.Data != nil {
+	if len(in.Data) != 0 {
 		const prefix string = ",\"data\":"
 		if first {
 			first = false
@@ -307,12 +290,10 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 		} else {
 			out.RawString(prefix)
 		}
-		if *in.Data == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
-		} else {
+		{
 			out.RawByte('{')
 			v4First := true
-			for v4Name, v4Value := range *in.Data {
+			for v4Name, v4Value := range in.Data {
 				if v4First {
 					v4First = false
 				} else {
@@ -351,7 +332,7 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 		}
 		out.String(string(in.Status))
 	}
-	if in.Results != nil {
+	if len(in.Results) != 0 {
 		const prefix string = ",\"results\":"
 		if first {
 			first = false
@@ -359,12 +340,10 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 		} else {
 			out.RawString(prefix)
 		}
-		if *in.Results == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
-		} else {
+		{
 			out.RawByte('{')
 			v5First := true
-			for v5Name, v5Value := range *in.Results {
+			for v5Name, v5Value := range in.Results {
 				if v5First {
 					v5First = false
 				} else {
