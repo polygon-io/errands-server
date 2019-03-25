@@ -13,6 +13,8 @@ import (
 	"encoding/json"
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
+	utils "github.com/polygon-io/errands-server/utils"
+	schemas "github.com/polygon-io/errands-server/schemas"
 )
 
 
@@ -44,7 +46,7 @@ func ( s *ErrandsServer ) errandNotifications( c *gin.Context ){
 			case t, ok := <-client.Notifications:
 				if ok {
 					// If we are subscribed to this event type:
-					if contains(client.EventSubs, t.Event) || client.EventSubs[0] == "*" {
+					if utils.Contains(client.EventSubs, t.Event) || client.EventSubs[0] == "*" {
 						jsonData, _ := json.Marshal( t )
 						client.Gin.SSEvent("message", string( jsonData ))
 						w.Flush()
@@ -69,7 +71,7 @@ func ( s *ErrandsServer ) errandNotifications( c *gin.Context ){
 
 func ( s *ErrandsServer ) createErrand( c *gin.Context ){
 	log.Println("creating errand")
-	var item Errand
+	var item schemas.Errand
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Errand validation failed!",
@@ -77,7 +79,7 @@ func ( s *ErrandsServer ) createErrand( c *gin.Context ){
 		})
 		return	
 	}
-	item.setDefaults()
+	item.SetDefaults()
 	err := s.DB.Update(func( txn *badger.Txn ) error {
 		return s.saveErrand( txn, &item )
 	})
@@ -97,8 +99,8 @@ func ( s *ErrandsServer ) createErrand( c *gin.Context ){
 
 
 
-func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *Errand ) error {
-	if !contains(ErrandStatuses, errand.Status) {
+func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *schemas.Errand ) error {
+	if !utils.Contains(schemas.ErrandStatuses, errand.Status) {
 		return errors.New("Invalid errand status state")
 	}
 	bytes, err := errand.MarshalJSON(); if err != nil {
@@ -111,7 +113,7 @@ func ( s *ErrandsServer ) saveErrand( txn *badger.Txn, errand *Errand ) error {
 
 
 func ( s *ErrandsServer ) getAllErrands( c *gin.Context ){
-	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+	errands, err := s.GetErrandsBy(func( errand *schemas.Errand ) bool {
 		return true
 	})
 	if err != nil {
@@ -132,7 +134,7 @@ func ( s *ErrandsServer ) getAllErrands( c *gin.Context ){
 func ( s *ErrandsServer ) getFilteredErrands( c *gin.Context ){
 	key := c.Param("key")
 	value := c.Param("val")
-	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+	errands, err := s.GetErrandsBy(func( errand *schemas.Errand ) bool {
 		switch key {
 		case "status":
 			return ( errand.Status == value )
@@ -173,7 +175,7 @@ func ( s *ErrandsServer ) updateFilteredErrands( c *gin.Context ){
 		})
 		return
 	}
-	errands, err := s.GetErrandsBy(func( errand *Errand ) bool {
+	errands, err := s.GetErrandsBy(func( errand *schemas.Errand ) bool {
 		switch key {
 		case "status":
 			return ( errand.Status == value )
@@ -191,7 +193,7 @@ func ( s *ErrandsServer ) updateFilteredErrands( c *gin.Context ){
 				}
 			}else {
 				if updateReq.Status != "" {
-					_, err = s.UpdateErrandByID( errand.ID, func( e *Errand ) error {
+					_, err = s.UpdateErrandByID( errand.ID, func( e *schemas.Errand ) error {
 						e.Status = updateReq.Status
 						return nil
 					})
@@ -221,8 +223,8 @@ func ( s *ErrandsServer ) updateFilteredErrands( c *gin.Context ){
 
 
 func ( s *ErrandsServer ) processErrand( c *gin.Context ){
-	var procErrand *Errand
-	errands := make([]*Errand, 0)
+	var procErrand *schemas.Errand
+	errands := make([]*schemas.Errand, 0)
 	hasFound := false
 	typeFilter := c.Param("type")
 	err := s.DB.Update(func(txn *badger.Txn) error {
@@ -234,7 +236,7 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 			item := it.Item()
 			err := item.Value(func( v []byte ) error {
 
-				errand := &Errand{}
+				errand := &schemas.Errand{}
 				err := errand.UnmarshalJSON( v ); if err != nil {
 					return err
 				}
@@ -264,11 +266,11 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 			})
 			procErrand = errands[0]
 			// We are processing this errand:
-			procErrand.Started = getTimestamp()
+			procErrand.Started = utils.GetTimestamp()
 			procErrand.Attempts += 1
 			procErrand.Status = "active"
 			procErrand.Progress = 0.0
-			if err := procErrand.addToLogs("INFO", "Started!"); err != nil {
+			if err := procErrand.AddToLogs("INFO", "Started!"); err != nil {
 				return err
 			}
 			err := s.saveErrand( txn, procErrand ); if err != nil {
@@ -306,8 +308,8 @@ func ( s *ErrandsServer ) processErrand( c *gin.Context ){
 
 
 
-func ( s *ErrandsServer ) GetErrandsBy( fn func ( *Errand ) bool ) ( []*Errand, error ) {
-	errands := make([]*Errand, 0)
+func ( s *ErrandsServer ) GetErrandsBy( fn func ( *schemas.Errand ) bool ) ( []*schemas.Errand, error ) {
+	errands := make([]*schemas.Errand, 0)
 	err := s.DB.View(func( txn *badger.Txn ) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 50
@@ -316,7 +318,7 @@ func ( s *ErrandsServer ) GetErrandsBy( fn func ( *Errand ) bool ) ( []*Errand, 
 		for it.Rewind(); it.Valid(); it.Next() {
 			item := it.Item()
 			err := item.Value(func( v []byte ) error {
-				errand := &Errand{}
+				errand := &schemas.Errand{}
 				err := errand.UnmarshalJSON( v ); if err != nil {
 					return err
 				}

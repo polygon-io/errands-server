@@ -1,12 +1,13 @@
 
-package main
-
+package schemas
 
 import (
 	"errors"
-	uuid "github.com/google/uuid"
 	gin "github.com/gin-gonic/gin"
+	uuid "github.com/google/uuid"
+	utils "github.com/polygon-io/errands-server/utils"
 )
+
 
 
 
@@ -50,44 +51,38 @@ type Log struct {
 
 
 
+
 func NewErrand() *Errand {
 	obj := &Errand{}
-	obj.setDefaults()
+	obj.SetDefaults()
 	return obj
 }
 
 
 
-func ( e *Errand ) setDefaults(){
+func ( e *Errand ) SetDefaults(){
 	uid := uuid.New()
 	uidText, err := uid.MarshalText(); if err != nil {
 		panic( err )
 	}
 	e.ID = string( uidText )
 	e.Status = "inactive"
-	e.Created = getTimestamp()
+	e.Created = utils.GetTimestamp()
 	e.Logs = make( []Log, 0 )
 }
 
 
-func ( e *Errand ) addToLogs( severity, message string ) error {
-	if !contains( LogSeverities, severity ) {
+func ( e *Errand ) AddToLogs( severity, message string ) error {
+	if !utils.Contains( LogSeverities, severity ) {
 		return errors.New("Invalid log severity")
 	}
 	obj := Log{
 		Severity: severity,
 		Message: message,
-		Timestamp: getTimestamp(),
+		Timestamp: utils.GetTimestamp(),
 	}
 	e.Logs = append( e.Logs, obj )
 	return nil
 }
 
-func contains(s []string, e string) bool {
-    for _, a := range s {
-        if a == e {
-            return true
-        }
-    }
-    return false
-}
+

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	gin "github.com/gin-gonic/gin"
 	badger "github.com/dgraph-io/badger"
+	utils "github.com/polygon-io/errands-server/utils"
+	schemas "github.com/polygon-io/errands-server/schemas"
 )
 
 
@@ -18,7 +20,7 @@ type UpdateRequest struct {
 	Logs 				[]string 	`json:"logs"`
 }
 func ( s *ErrandsServer ) updateErrand( c *gin.Context ){
-	var updatedErrand *Errand
+	var updatedErrand *schemas.Errand
 	var updateReq UpdateRequest
 	if err := c.ShouldBind(&updateReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -27,7 +29,7 @@ func ( s *ErrandsServer ) updateErrand( c *gin.Context ){
 		})
 		return
 	}
-	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
+	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *schemas.Errand ) error {
 		if errand.Status != "active" {
 			return errors.New("Errand must be in active state to update progress")
 		}
@@ -63,7 +65,7 @@ type FailedRequest struct {
 	Reason 			string 	`json:"reason" binding:"required"`
 }
 func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
-	var updatedErrand *Errand
+	var updatedErrand *schemas.Errand
 	var failedReq FailedRequest
 	if err := c.ShouldBind(&failedReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -72,15 +74,15 @@ func ( s *ErrandsServer ) failedErrand( c *gin.Context ){
 		})
 		return
 	}
-	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
+	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *schemas.Errand ) error {
 		// if errand.Status != "active" {
 		// 	return errors.New("Errand must be in active state to fail")
 		// }
 		// Update this errand attributes:
-		if err := errand.addToLogs("ERROR", failedReq.Reason); err != nil {
+		if err := errand.AddToLogs("ERROR", failedReq.Reason); err != nil {
 			return err
 		}
-		errand.Failed = getTimestamp()
+		errand.Failed = utils.GetTimestamp()
 		errand.Status = "failed"
 		errand.Progress = 0
 		if errand.Options.Retries > 0 {
@@ -112,7 +114,7 @@ type CompletedRequest struct {
 	Results 			*gin.H 	`json:"results"`
 }
 func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
-	var updatedErrand *Errand
+	var updatedErrand *schemas.Errand
 	var compReq CompletedRequest
 	if err := c.ShouldBind(&compReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -122,15 +124,15 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 		return
 	}
 	shouldDelete := false
-	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
+	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *schemas.Errand ) error {
 		// if errand.Status != "active" {
 		// 	return errors.New("Errand must be in active state to complete")
 		// }
 		// Update this errand attributes:
-		if err := errand.addToLogs("INFO", "Completed!"); err != nil {
+		if err := errand.AddToLogs("INFO", "Completed!"); err != nil {
 			return err
 		}
-		errand.Completed = getTimestamp()
+		errand.Completed = utils.GetTimestamp()
 		errand.Status = "completed"
 		errand.Progress = 100
 		errand.Results = compReq.Results
@@ -163,13 +165,13 @@ func ( s *ErrandsServer ) completeErrand( c *gin.Context ){
 
 
 func ( s *ErrandsServer ) retryErrand( c *gin.Context ){
-	var updatedErrand *Errand
-	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
+	var updatedErrand *schemas.Errand
+	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *schemas.Errand ) error {
 		if errand.Status == "inactive" {
 			return errors.New("Cannot retry errand which is in inactive state")
 		}
 		// Update this errand attributes:
-		if err := errand.addToLogs("INFO", "Retrying!"); err != nil {
+		if err := errand.AddToLogs("INFO", "Retrying!"); err != nil {
 			return err
 		}
 		errand.Status = "inactive"
@@ -194,7 +196,7 @@ func ( s *ErrandsServer ) retryErrand( c *gin.Context ){
 
 
 func ( s *ErrandsServer ) logToErrand( c *gin.Context ){
-	var logReq Log
+	var logReq schemas.Log
 	if err := c.ShouldBind(&logReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid Parameters",
@@ -202,12 +204,12 @@ func ( s *ErrandsServer ) logToErrand( c *gin.Context ){
 		})
 		return
 	}
-	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *Errand ) error {
+	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func( errand *schemas.Errand ) error {
 		if errand.Status != "active" {
 			return errors.New("Errand must be in active state to log to")
 		}
 		// Update this errand attributes:
-		return errand.addToLogs(logReq.Severity, logReq.Message)
+		return errand.AddToLogs(logReq.Severity, logReq.Message)
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -260,14 +262,14 @@ func ( s *ErrandsServer ) deleteErrandByID( id string ) error {
 	If no error is returned, the errand will be saved in the DB with the new 
 	attributes.
  */
-func ( s *ErrandsServer ) UpdateErrandByID( id string, fn func( *Errand ) error ) ( *Errand, error ) {
-	var updatedErrand *Errand
+func ( s *ErrandsServer ) UpdateErrandByID( id string, fn func( *schemas.Errand ) error ) ( *schemas.Errand, error ) {
+	var updatedErrand *schemas.Errand
 	err := s.DB.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte( id )); if err != nil {
 			return err
 		}
 		err = item.Value(func(v []byte) error {
-			errand := &Errand{}
+			errand := &schemas.Errand{}
 			err := errand.UnmarshalJSON( v ); if err != nil {
 				return err
 			}

@@ -13,6 +13,7 @@ import (
 	badger "github.com/dgraph-io/badger"
 	binding "github.com/gin-gonic/gin/binding"
 	validator "gopkg.in/go-playground/validator.v8"
+	schemas "github.com/polygon-io/errands-server/schemas"
 )
 
 
@@ -23,8 +24,8 @@ import (
 
 //easyjson:json
 type Notification struct {
-	Event 				string 		`json:"event"`
-	Errand 				Errand 		`json:"errand,omitempty"`
+	Event 				string 				`json:"event"`
+	Errand 				schemas.Errand 		`json:"errand,omitempty"`
 }
 
 
@@ -62,7 +63,7 @@ func NewErrandsServer( cfg *Config ) *ErrandsServer {
 	return obj
 }
 
-func ( s *ErrandsServer ) AddNotification( event string, errand *Errand ){
+func ( s *ErrandsServer ) AddNotification( event string, errand *schemas.Errand ){
 	obj := &Notification{
 		Event: event,
 		Errand: *errand,
@@ -119,7 +120,7 @@ func ( s *ErrandsServer ) killDB(){
 
 
 func UserStructLevelValidation(v *validator.Validate, structLevel *validator.StructLevel) {
-	errand := structLevel.CurrentStruct.Interface().(Errand)
+	errand := structLevel.CurrentStruct.Interface().(schemas.Errand)
 	if errand.Options.TTL < 5 && errand.Options.TTL != 0 {
 		structLevel.ReportError(
 			reflect.ValueOf(errand.Options.TTL), "ttl", "ttl", "must be positive, and more than 5",
@@ -153,7 +154,7 @@ func ( s *ErrandsServer) createAPI(){
 	// s.API.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterStructValidation(UserStructLevelValidation, Errand{})
+		v.RegisterStructValidation(UserStructLevelValidation, schemas.Errand{})
 	}
 
 	// Singular errand Routes:
