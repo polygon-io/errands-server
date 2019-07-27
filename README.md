@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="misc/illustration.png" />
+</p>
+
 # Errands Server
 Errands API Server. A language agnostic, HTTP based queue with server side events ( SSE ). Persistant storage using Badger for SSD performance. Concurrency safe for multiple workers to be processing errands off the queue.
 
