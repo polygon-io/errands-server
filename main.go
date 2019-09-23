@@ -1,15 +1,12 @@
-
 package main
 
 import (
 	"os"
-	"log"
 	"os/signal"
+
 	envconfig "github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
 )
-
-
-
 
 /*
 
@@ -22,42 +19,38 @@ import (
 		ERRANDS_STORAGE="/errands/" - Will change the DB location to /errands/
 
 
- */
+*/
 var cfg Config
+
 type Config struct {
-	Storage 			string 	`split_words:"true" default:"./errands"`
-	Port 				string 	`split_words:"true" default:":5555"`
+	Storage string `split_words:"true" default:"./errands.db"`
+	Port    string `split_words:"true" default:":5555"`
 }
 
-
 var server *ErrandsServer
-func main(){
+
+func main() {
 
 	// Parse Env Vars:
-	err := envconfig.Process( "ERRANDS", &cfg ); if err != nil {
-		log.Fatal( err )
+	err := envconfig.Process("ERRANDS", &cfg)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// trap SIGINT to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	server = NewErrandsServer( &cfg )
-	log.Println("listening for signals")
+	server = NewErrandsServer(&cfg)
+	log.Info("listening for signals")
 	for {
 		select {
-			case <-signals:
-				// Logger.Info("main: done. exiting")
-				log.Println("Exiting")
-				server.kill()
-				return
+		case <-signals:
+			// Logger.Info("main: done. exiting")
+			log.Info("Exiting")
+			server.kill()
+			return
 		}
 	}
 
 }
-
-
-
-
-
-

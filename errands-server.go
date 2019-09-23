@@ -1,96 +1,100 @@
-
 package main
 
-
 import (
-	"log"
+	"time"
+
+	log "github.com/sirupsen/logrus"
 	// "time"
-	"reflect"
 	"net/http"
-	gin "github.com/gin-gonic/gin"
+	"reflect"
+
 	cors "github.com/gin-contrib/cors"
+	gin "github.com/gin-gonic/gin"
 	// gzip "github.com/gin-contrib/gzip"
-	badger "github.com/dgraph-io/badger"
+
 	binding "github.com/gin-gonic/gin/binding"
-	validator "gopkg.in/go-playground/validator.v8"
+	store "github.com/polygon-io/errands-server/memorydb"
 	schemas "github.com/polygon-io/errands-server/schemas"
+	validator "gopkg.in/go-playground/validator.v8"
 )
-
-
-
-
-
-
 
 //easyjson:json
 type Notification struct {
-	Event 				string 				`json:"event"`
-	Errand 				schemas.Errand 		`json:"errand,omitempty"`
+	Event  string         `json:"event"`
+	Errand schemas.Errand `json:"errand,omitempty"`
 }
-
 
 type ErrandsServer struct {
-	StorageDir 			string
-	Port 				string
-	DB 					*badger.DB
-	Server 				*http.Server
-	API 				*gin.Engine
-	ErrandsRoutes 		*gin.RouterGroup
-	ErrandRoutes 		*gin.RouterGroup
-	Notifications 		chan *Notification
-	StreamClients 		[]*Client
-	RegisterClient 		chan *Client
-	UnregisterClient 	chan *Client
+	StorageDir       string
+	Port             string
+	Store            *store.MemoryStore
+	Server           *http.Server
+	API              *gin.Engine
+	ErrandsRoutes    *gin.RouterGroup
+	ErrandRoutes     *gin.RouterGroup
+	Notifications    chan *Notification
+	StreamClients    []*Client
+	RegisterClient   chan *Client
+	UnregisterClient chan *Client
+	periodicSave     bool
 }
 
-
-
-
-
-
-func NewErrandsServer( cfg *Config ) *ErrandsServer {
+func NewErrandsServer(cfg *Config) *ErrandsServer {
 	obj := &ErrandsServer{
-		StorageDir: cfg.Storage,
-		Port: cfg.Port,
-		StreamClients: make([]*Client, 0 ),
-		RegisterClient: make( chan *Client, 10 ),
-		UnregisterClient: make( chan *Client, 10 ),
-		Notifications: make(chan *Notification, 100),
+		StorageDir:       cfg.Storage,
+		Port:             cfg.Port,
+		StreamClients:    make([]*Client, 0),
+		RegisterClient:   make(chan *Client, 10),
+		UnregisterClient: make(chan *Client, 10),
+		Notifications:    make(chan *Notification, 100),
+		Store:            store.New(),
+		periodicSave:     true,
 	}
 	go obj.createAPI()
 	go obj.broadcastLoop()
-	obj.createDB()
+	if err := obj.Store.LoadFile(cfg.Storage); err != nil {
+		log.Warning("Could not load data from previous DB file.")
+		log.Warning("If this is your first time running, this is normal.")
+		log.Warning("If not please check the contents of your file: ", cfg.Storage)
+	}
+	go obj.periodicallySaveDB()
 	return obj
 }
 
-func ( s *ErrandsServer ) AddNotification( event string, errand *schemas.Errand ){
+func (s *ErrandsServer) periodicallySaveDB() {
+	for {
+		time.Sleep(60 * time.Second)
+		if !s.periodicSave {
+			return
+		}
+		log.Info("Checkpoint saving DB to file...")
+		if err := s.Store.SaveFile(cfg.Storage); err != nil {
+			log.Error("----- Error checkpoint saving the DB to file -----")
+			log.Error(err)
+		}
+	}
+}
+
+func (s *ErrandsServer) AddNotification(event string, errand *schemas.Errand) {
 	obj := &Notification{
-		Event: event,
+		Event:  event,
 		Errand: *errand,
 	}
 	s.Notifications <- obj
 }
 
-func ( s *ErrandsServer ) broadcastLoop(){
-	// go func(){
-	// 	for {
-	// 		s.Notifications <- &Notification{
-	// 			Event: "heartbeat",
-	// 		}
-	// 		time.Sleep(2 * time.Second)
-	// 	}
-	// }()
+func (s *ErrandsServer) broadcastLoop() {
 	for {
 		select {
-		case client := <- s.RegisterClient:
-			s.StreamClients = append( s.StreamClients, client )
-		case client := <- s.UnregisterClient:
+		case client := <-s.RegisterClient:
+			s.StreamClients = append(s.StreamClients, client)
+		case client := <-s.UnregisterClient:
 			for i, c := range s.StreamClients {
 				if c == client {
 					s.StreamClients = append(s.StreamClients[:i], s.StreamClients[i+1:]...)
 				}
 			}
-		case not := <- s.Notifications:
+		case not := <-s.Notifications:
 			for _, client := range s.StreamClients {
 				notificationCopy := &Notification{}
 				*notificationCopy = *not
@@ -100,24 +104,25 @@ func ( s *ErrandsServer ) broadcastLoop(){
 	}
 }
 
-
-func ( s *ErrandsServer ) kill(){
+func (s *ErrandsServer) kill() {
 	s.killAPI()
 	for _, client := range s.StreamClients {
 		client.Gone()
 	}
 	s.killDB()
 }
-func ( s *ErrandsServer) killAPI(){
+
+func (s *ErrandsServer) killAPI() {
 	log.Println("Closing the HTTP Server")
 	s.Server.Close()
 }
-func ( s *ErrandsServer ) killDB(){
+
+func (s *ErrandsServer) killDB() {
 	log.Println("Closing the DB")
-	s.DB.Close()
+	if err := s.Store.SaveFile(cfg.Storage); err != nil {
+		log.Fatal(err)
+	}
 }
-
-
 
 func UserStructLevelValidation(v *validator.Validate, structLevel *validator.StructLevel) {
 	errand := structLevel.CurrentStruct.Interface().(schemas.Errand)
@@ -128,25 +133,12 @@ func UserStructLevelValidation(v *validator.Validate, structLevel *validator.Str
 	}
 }
 
-
-
-func ( s *ErrandsServer ) createDB(){
-	opts := badger.DefaultOptions
-	opts.Dir = s.StorageDir
-	opts.ValueDir = s.StorageDir
-	var err error
-	s.DB, err = badger.Open( opts ); if err != nil {
-		log.Fatal( err )
-	}
-}
-
-
-func ( s *ErrandsServer) createAPI(){
+func (s *ErrandsServer) createAPI() {
 
 	s.API = gin.Default()
 
 	CORSconfig := cors.DefaultConfig()
-	CORSconfig.AllowOriginFunc = func( origin string ) bool {
+	CORSconfig.AllowOriginFunc = func(origin string) bool {
 		// fmt.Println("Connection from", origin)
 		return true
 	}
@@ -172,7 +164,6 @@ func ( s *ErrandsServer) createAPI(){
 		s.ErrandRoutes.POST("/:id/retry", s.retryErrand)
 	}
 
-
 	// Errands Routes
 	s.ErrandsRoutes = s.API.Group("/v1/errands")
 	{
@@ -191,8 +182,8 @@ func ( s *ErrandsServer) createAPI(){
 	}
 
 	s.Server = &http.Server{
-		Addr: 		s.Port,
-		Handler: 	s.API,
+		Addr:    s.Port,
+		Handler: s.API,
 	}
 
 	log.Println("Starting server on port:", s.Port)
@@ -201,7 +192,3 @@ func ( s *ErrandsServer) createAPI(){
 	}
 
 }
-
-
-
-
