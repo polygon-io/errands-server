@@ -138,6 +138,7 @@ func (s *ErrandsServer) createAPI() {
 	s.API = gin.Default()
 
 	CORSconfig := cors.DefaultConfig()
+	CORSconfig.AllowCredentials = true
 	CORSconfig.AllowOriginFunc = func(origin string) bool {
 		// fmt.Println("Connection from", origin)
 		return true
