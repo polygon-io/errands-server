@@ -1,0 +1,47 @@
+---
+kind: pipeline
+type: docker
+name: review
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: fmt
+  image: golang:1.14
+  commands:
+  - ./check_gofmt
+  volumes:
+  - name: deps
+    path: /go/pkg
+
+- name: vet
+  image: golang:1.14
+  commands:
+  - go vet ./...
+  volumes:
+  - name: deps
+    path: /go/pkg
+
+- name: test
+  image: golang:1.14
+  commands:
+  - go test -v ./...
+  environment:
+    CGO_ENABLED: 0
+    GOOS: linux
+  volumes:
+  - name: deps
+    path: /go/pkg
+
+volumes:
+- name: deps
+  temp: {}
+
+trigger:
+  branch:
+  - master
+  event:
+  - pull_request
+
