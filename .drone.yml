@@ -7,15 +7,6 @@ platform:
   os: linux
   arch: amd64
 
-steps:
-- name: fmt
-  image: golang:1.14
-  commands:
-  - ./check_gofmt
-  volumes:
-  - name: deps
-    path: /go/pkg
-
 - name: vet
   image: golang:1.14
   commands:
