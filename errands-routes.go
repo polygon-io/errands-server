@@ -1,21 +1,21 @@
+//nolint:golint // TODO
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"io"
-	// "fmt"
+	"net/http"
 	"sort"
 
 	log "github.com/sirupsen/logrus"
-	// "time"
-	"encoding/json"
-	"errors"
-	"net/http"
 
 	gin "github.com/gin-gonic/gin"
 	schemas "github.com/polygon-io/errands-server/schemas"
 	utils "github.com/polygon-io/errands-server/utils"
 )
 
+//nolint:gocognit // TODO
 func (s *ErrandsServer) errandNotifications(c *gin.Context) {
 	client, err := s.NewClient(c)
 	if err != nil {
@@ -23,9 +23,12 @@ func (s *ErrandsServer) errandNotifications(c *gin.Context) {
 			"message": "Error Creating Subscription",
 			"error":   err.Error(),
 		})
+
 		return
 	}
+
 	w := client.Gin.Writer
+
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/event-stream")
@@ -52,20 +55,23 @@ func (s *ErrandsServer) errandNotifications(c *gin.Context) {
 				return false
 			}
 		}
-		return false
 	})
 }
 
 func (s *ErrandsServer) createErrand(c *gin.Context) {
 	log.Println("creating errand")
+
 	var item schemas.Errand
+
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Errand validation failed!",
 			"error":   err.Error(),
 		})
+
 		return
 	}
+
 	item.SetDefaults()
 	s.Store.SetDefault(item.ID, item)
 	s.AddNotification("created", &item)
@@ -77,23 +83,19 @@ func (s *ErrandsServer) createErrand(c *gin.Context) {
 
 func (s *ErrandsServer) saveErrand(errand *schemas.Errand) error {
 	if !utils.Contains(schemas.ErrandStatuses, errand.Status) {
-		return errors.New("Invalid errand status state")
+		return errors.New("invalid errand status state")
 	}
+
 	s.Store.SetDefault(errand.ID, *errand)
+
 	return nil
 }
 
 func (s *ErrandsServer) getAllErrands(c *gin.Context) {
-	errands, err := s.GetErrandsBy(func(errand *schemas.Errand) bool {
+	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		return true
 	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error!",
-			"error":   err.Error(),
-		})
-		return
-	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "OK",
 		"results": errands,
@@ -103,7 +105,8 @@ func (s *ErrandsServer) getAllErrands(c *gin.Context) {
 func (s *ErrandsServer) getFilteredErrands(c *gin.Context) {
 	key := c.Param("key")
 	value := c.Param("val")
-	errands, err := s.GetErrandsBy(func(errand *schemas.Errand) bool {
+
+	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
 			return (errand.Status == value)
@@ -113,13 +116,7 @@ func (s *ErrandsServer) getFilteredErrands(c *gin.Context) {
 			return false
 		}
 	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error!",
-			"error":   err.Error(),
-		})
-		return
-	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "OK",
 		"results": errands,
@@ -131,18 +128,23 @@ type filteredUpdateReq struct {
 	Delete bool   `json:"delete"`
 }
 
+//nolint:gocognit // TODO
 func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 	key := c.Param("key")
 	value := c.Param("val")
+
 	var updateReq filteredUpdateReq
+
 	if err := c.ShouldBind(&updateReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid Parameters",
 			"error":   err.Error(),
 		})
+
 		return
 	}
-	errands, err := s.GetErrandsBy(func(errand *schemas.Errand) bool {
+
+	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
 			return (errand.Status == value)
@@ -152,33 +154,32 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 			return false
 		}
 	})
-	if err == nil {
-		for _, errand := range errands {
-			if updateReq.Delete == true {
-				err = s.deleteErrandByID(errand.ID)
-				if err != nil {
-					break
-				}
-			} else {
-				if updateReq.Status != "" {
-					_, err = s.UpdateErrandByID(errand.ID, func(e *schemas.Errand) error {
-						e.Status = updateReq.Status
-						return nil
-					})
-					if err != nil {
-						break
-					}
-				}
+
+	var err error
+
+	for _, errand := range errands {
+		if updateReq.Delete {
+			s.deleteErrandByID(errand.ID)
+		} else if updateReq.Status != "" {
+			_, err = s.UpdateErrandByID(errand.ID, func(e *schemas.Errand) error {
+				e.Status = updateReq.Status
+				return nil
+			})
+			if err != nil {
+				break
 			}
 		}
 	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error!",
 			"error":   err.Error(),
 		})
+
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status": "OK",
 		"count":  len(errands),
@@ -187,14 +188,17 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 
 func (s *ErrandsServer) processErrand(c *gin.Context) {
 	var procErrand schemas.Errand
+
 	errands := make([]schemas.Errand, 0)
 	typeFilter := c.Param("type")
 
 	for _, itemObj := range s.Store.Items() {
 		item := itemObj.Object.(schemas.Errand)
+
 		if item.Status != "inactive" {
 			continue
 		}
+
 		if item.Type != typeFilter {
 			continue
 		}
@@ -206,6 +210,7 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "No jobs",
 		})
+
 		return
 	}
 
@@ -216,14 +221,16 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 	sort.SliceStable(errands, func(i, j int) bool {
 		return errands[i].Options.Priority > errands[j].Options.Priority
 	})
+
 	procErrand = errands[0]
+
 	// We are processing this errand:
 	procErrand.Started = utils.GetTimestamp()
 	procErrand.Attempts += 1
 	procErrand.Status = "active"
 	procErrand.Progress = 0.0
 	_ = procErrand.AddToLogs("INFO", "Started!")
-	s.saveErrand(&procErrand)
+	_ = s.saveErrand(&procErrand)
 
 	s.AddNotification("processing", &procErrand)
 	c.JSON(http.StatusOK, gin.H{
@@ -232,13 +239,15 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 	})
 }
 
-func (s *ErrandsServer) GetErrandsBy(fn func(*schemas.Errand) bool) ([]schemas.Errand, error) {
+func (s *ErrandsServer) GetErrandsBy(fn func(*schemas.Errand) bool) []schemas.Errand {
 	errands := make([]schemas.Errand, 0)
+
 	for _, itemObj := range s.Store.Items() {
 		errand := itemObj.Object.(schemas.Errand)
 		if fn(&errand) {
 			errands = append(errands, errand)
 		}
 	}
-	return errands, nil
+
+	return errands
 }

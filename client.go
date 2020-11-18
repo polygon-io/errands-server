@@ -1,10 +1,10 @@
+//nolint:golint // TODO
 package main
 
 import (
-	// "io"
 	"errors"
 	"strings"
-	// "encoding/json"
+
 	gin "github.com/gin-gonic/gin"
 )
 
@@ -27,11 +27,13 @@ func (s *ErrandsServer) NewClient(c *gin.Context) (*Client, error) {
 		Gin:           c,
 	}
 	events := c.DefaultQuery("events", "*")
+
 	obj.EventSubs = strings.Split(events, ",")
 	if len(obj.EventSubs) < 1 {
-		return obj, errors.New("Must have at least 1 event subscription")
+		return obj, errors.New("must have at least 1 event subscription")
 	}
 	s.RegisterClient <- obj
+
 	return obj, nil
 }
 
