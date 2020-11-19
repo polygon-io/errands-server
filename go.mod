@@ -1,6 +1,6 @@
 module github.com/polygon-io/errands-server
 
-go 1.12
+go 1.15
 
 require (
 	github.com/gin-contrib/cors v0.0.0-20170318125340-cf4846e6a636

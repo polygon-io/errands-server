@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals,golint // TODO
 package main
 
 import (
@@ -12,7 +13,7 @@ import (
 
 	ENVIRONMENT VARIABLES:
 	-----------------------------
-	Set values via env varialbes, prefixed with ERRANDS_
+	Set values via env variables, prefixed with ERRANDS_
 	eg:
 
 		ERRANDS_PORT=:4545 - Will change the listening port to 4545
@@ -30,7 +31,6 @@ type Config struct {
 var server *ErrandsServer
 
 func main() {
-
 	// Parse Env Vars:
 	err := envconfig.Process("ERRANDS", &cfg)
 	if err != nil {
@@ -42,15 +42,10 @@ func main() {
 	signal.Notify(signals, os.Interrupt)
 
 	server = NewErrandsServer(&cfg)
-	log.Info("listening for signals")
-	for {
-		select {
-		case <-signals:
-			// Logger.Info("main: done. exiting")
-			log.Info("Exiting")
-			server.kill()
-			return
-		}
-	}
 
+	log.Info("listening for signals")
+
+	<-signals
+	log.Info("Exiting")
+	server.kill()
 }

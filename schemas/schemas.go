@@ -1,8 +1,10 @@
+// Schemas provides model schemas for the errand server.
+//nolint:golint,gochecknoglobals,stylecheck // TODO
 package schemas
 
 import (
-	"errors"
-	// gin "github.com/gin-gonic/gin"
+	"fmt"
+
 	uuid "github.com/google/uuid"
 	utils "github.com/polygon-io/errands-server/utils"
 )
@@ -48,15 +50,18 @@ type Log struct {
 func NewErrand() *Errand {
 	obj := &Errand{}
 	obj.SetDefaults()
+
 	return obj
 }
 
 func (e *Errand) SetDefaults() {
 	uid := uuid.New()
+
 	uidText, err := uid.MarshalText()
 	if err != nil {
 		panic(err)
 	}
+
 	e.ID = string(uidText)
 	e.Status = "inactive"
 	e.Created = utils.GetTimestamp()
@@ -65,13 +70,15 @@ func (e *Errand) SetDefaults() {
 
 func (e *Errand) AddToLogs(severity, message string) error {
 	if !utils.Contains(LogSeverities, severity) {
-		return errors.New("Invalid log severity")
+		return fmt.Errorf("invalid log severity: %s", severity)
 	}
+
 	obj := Log{
 		Severity:  severity,
 		Message:   message,
 		Timestamp: utils.GetTimestamp(),
 	}
 	e.Logs = append(e.Logs, obj)
+
 	return nil
 }

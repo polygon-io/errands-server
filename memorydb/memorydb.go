@@ -1,3 +1,5 @@
+// Memorydb provides a key value store.
+//nolint:golint,stylecheck // TODO
 package memorydb
 
 import (
@@ -25,10 +27,9 @@ type MemoryStore struct {
 }
 
 func New() *MemoryStore {
-	obj := &MemoryStore{
+	return &MemoryStore{
 		cache.New(cache.NoExpiration, 0),
 	}
-	return obj
 }
 
 func LoadDBFrom(dbLocation string) error {
