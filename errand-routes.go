@@ -10,8 +10,8 @@ import (
 	utils "github.com/polygon-io/errands-server/utils"
 )
 
-const INACTIVE = "inactive"
-const ACTIVE = "active"
+const inactive = "inactive"
+const active = "active"
 
 type UpdateRequest struct {
 	Progress float64  `json:"progress"`
@@ -35,7 +35,7 @@ func (s *ErrandsServer) updateErrand(c *gin.Context) {
 	}
 
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func(errand *schemas.Errand) error {
-		if errand.Status != ACTIVE {
+		if errand.Status != active {
 			return errors.New("errand must be in active state to update progress")
 		}
 		// Update this errand attributes:
@@ -94,7 +94,7 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 		if errand.Options.Retries > 0 {
 			// If we should retry this errand:
 			if errand.Attempts <= errand.Options.Retries {
-				errand.Status = INACTIVE
+				errand.Status = inactive
 			}
 		}
 
@@ -173,14 +173,14 @@ func (s *ErrandsServer) retryErrand(c *gin.Context) {
 	var updatedErrand *schemas.Errand
 
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func(errand *schemas.Errand) error {
-		if errand.Status == INACTIVE {
+		if errand.Status == inactive {
 			return errors.New("cannot retry errand which is in inactive state")
 		}
 		// Update this errand attributes:
 		if err := errand.AddToLogs("INFO", "Retrying!"); err != nil {
 			return err
 		}
-		errand.Status = INACTIVE
+		errand.Status = inactive
 		errand.Progress = 0
 		return nil
 	})
@@ -212,7 +212,7 @@ func (s *ErrandsServer) logToErrand(c *gin.Context) {
 	}
 
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func(errand *schemas.Errand) error {
-		if errand.Status != ACTIVE {
+		if errand.Status != active {
 			return errors.New("errand must be in active state to log to")
 		}
 
