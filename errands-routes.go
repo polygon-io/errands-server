@@ -254,8 +254,6 @@ func (s *ErrandsServer) GetErrandsBy(fn func(*schemas.Errand) bool) []schemas.Er
 }
 
 func (s *ErrandsServer) clearErrands(c *gin.Context) {
-	var procErrand schemas.Errand
-
 	duration, err := time.ParseDuration(c.Param("duration"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -296,6 +294,6 @@ func (s *ErrandsServer) clearErrands(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "OK",
-		"results": procErrand,
+		"results": errands,
 	})
 }
