@@ -264,7 +264,7 @@ func (s *ErrandsServer) clearErrands(c *gin.Context) {
 		return
 	}
 
-	threshold := time.Now().Add(0 - duration)
+	threshold := time.Now().Add(-duration)
 	errands := make([]schemas.Errand, 0)
 
 	for _, itemObj := range s.Store.Items() {
