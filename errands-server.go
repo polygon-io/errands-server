@@ -185,6 +185,8 @@ func (s *ErrandsServer) createAPI() {
 	s.ErrandsRoutes.GET("/list/:key/:val", s.getFilteredErrands)
 	// Update all errands in this state:
 	s.ErrandsRoutes.POST("/update/:key/:val", s.updateFilteredErrands)
+	// Clear all finished errands older than.
+	s.ErrandsRoutes.POST("/clear/:duration", s.clearErrands)
 
 	s.Server = &http.Server{
 		Addr:    s.Port,

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -250,4 +251,49 @@ func (s *ErrandsServer) GetErrandsBy(fn func(*schemas.Errand) bool) []schemas.Er
 	}
 
 	return errands
+}
+
+func (s *ErrandsServer) clearErrands(c *gin.Context) {
+	duration, err := time.ParseDuration(c.Param("duration"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Duration",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	threshold := time.Now().Add(-duration)
+	errands := make([]schemas.Errand, 0)
+
+	for _, itemObj := range s.Store.Items() {
+		item := itemObj.Object.(schemas.Errand)
+
+		var stoppedRunning int64
+
+		switch item.Status {
+		case "completed":
+			stoppedRunning = item.Completed
+		case "failed":
+			stoppedRunning = item.Failed
+		default:
+			continue
+		}
+
+		if stoppedRunning >= threshold.UnixNano() {
+			continue
+		}
+
+		errands = append(errands, item)
+	}
+
+	for _, errand := range errands {
+		s.deleteErrandByID(errand.ID)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "OK",
+		"results": errands,
+	})
 }
