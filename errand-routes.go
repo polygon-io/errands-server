@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	gin "github.com/gin-gonic/gin"
+	"github.com/polygon-io/errands-server/metrics"
 	schemas "github.com/polygon-io/errands-server/schemas"
 	utils "github.com/polygon-io/errands-server/utils"
 )
@@ -95,7 +96,13 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 			// If we should retry this errand:
 			if errand.Attempts <= errand.Options.Retries {
 				errand.Status = inactive
+			} else {
+				// If this errand is out of retries
+				metrics.ErrandFailed(errand.Type)
 			}
+		} else {
+			// If this errand was not configured with retries
+			metrics.ErrandFailed(errand.Type)
 		}
 
 		return nil
@@ -151,6 +158,8 @@ func (s *ErrandsServer) completeErrand(c *gin.Context) {
 		if errand.Options.DeleteOnCompleted {
 			shouldDelete = true
 		}
+
+		metrics.ErrandCompleted(errand.Type)
 		return nil
 	})
 	if err == nil && shouldDelete && updatedErrand.ID != "" {
