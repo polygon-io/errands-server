@@ -22,10 +22,12 @@ func init() {
 	prometheus.MustRegister(errandCompletedCounter)
 }
 
+// ErrandCompleted increments the errand completed counter for a successfully completed errand.
 func ErrandCompleted(errandType string) {
 	errandCompletedCounter.With(prometheus.Labels{labelErrandType: errandType, labelStatus: "completed"}).Inc()
 }
 
+// ErrandFailed increments the errand completed counter for an errand that failed (and is not going to retry anymore).
 func ErrandFailed(errandType string) {
 	errandCompletedCounter.With(prometheus.Labels{labelErrandType: errandType, labelStatus: "failed"}).Inc()
 }
