@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 
 	cors "github.com/gin-contrib/cors"
@@ -187,6 +188,11 @@ func (s *ErrandsServer) createAPI() {
 	s.ErrandsRoutes.POST("/update/:key/:val", s.updateFilteredErrands)
 	// Clear all finished errands older than.
 	s.ErrandsRoutes.POST("/clear/:duration", s.clearErrands)
+
+	// Prometheus metrics
+	s.ErrandRoutes.GET("/metrics", func(c *gin.Context) {
+		promhttp.Handler().ServeHTTP(c.Writer, c.Request)
+	})
 
 	s.Server = &http.Server{
 		Addr:    s.Port,

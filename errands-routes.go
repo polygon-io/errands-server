@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	gin "github.com/gin-gonic/gin"
+
 	schemas "github.com/polygon-io/errands-server/schemas"
 	utils "github.com/polygon-io/errands-server/utils"
 )
@@ -110,9 +111,9 @@ func (s *ErrandsServer) getFilteredErrands(c *gin.Context) {
 	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
-			return (errand.Status == value)
+			return errand.Status == value
 		case "type":
-			return (errand.Type == value)
+			return errand.Type == value
 		default:
 			return false
 		}
@@ -148,9 +149,9 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
-			return (errand.Status == value)
+			return errand.Status == value
 		case "type":
-			return (errand.Type == value)
+			return errand.Type == value
 		default:
 			return false
 		}
