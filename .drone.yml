@@ -19,6 +19,8 @@ steps:
 - name: lint
   pull: always
   image: polygonio/go-linter:v1.13
+  environment:
+    ADDITIONAL_ARGS: --new-from-rev 86548ee1cf5f1478bdd5ee285a2dd0d6f8406c76
   volumes:
   - name: deps
     path: /go/pkg

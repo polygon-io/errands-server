@@ -1,5 +1,4 @@
 // Schemas provides model schemas for the errand server.
-//nolint:golint,gochecknoglobals,stylecheck // TODO
 package schemas
 
 import (

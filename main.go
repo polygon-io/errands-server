@@ -1,4 +1,3 @@
-//nolint:gochecknoglobals,golint // TODO
 package main
 
 import (
@@ -28,8 +27,6 @@ type Config struct {
 	Port    string `split_words:"true" default:":5555"`
 }
 
-var server *ErrandsServer
-
 func main() {
 	// Parse Env Vars:
 	err := envconfig.Process("ERRANDS", &cfg)
@@ -41,7 +38,7 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	server = NewErrandsServer(&cfg)
+	server := NewErrandsServer(&cfg)
 
 	log.Info("listening for signals")
 

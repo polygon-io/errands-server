@@ -1,4 +1,3 @@
-//nolint:golint,stylecheck // TODO add comments later.
 package main
 
 import (
@@ -90,7 +89,6 @@ func (s *ErrandsServer) AddNotification(event string, errand *schemas.Errand) {
 	s.Notifications <- obj
 }
 
-//nolint:gocognit // This can't be easily split up.
 func (s *ErrandsServer) broadcastLoop() {
 	for {
 		select {

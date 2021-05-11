@@ -1,4 +1,3 @@
-//nolint:golint // TODO
 package main
 
 import (
@@ -17,7 +16,6 @@ import (
 	utils "github.com/polygon-io/errands-server/utils"
 )
 
-//nolint:gocognit // TODO
 func (s *ErrandsServer) errandNotifications(c *gin.Context) {
 	client, err := s.NewClient(c)
 	if err != nil {
@@ -130,7 +128,6 @@ type filteredUpdateReq struct {
 	Delete bool   `json:"delete"`
 }
 
-//nolint:gocognit // TODO
 func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 	key := c.Param("key")
 	value := c.Param("val")
