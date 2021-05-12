@@ -82,7 +82,7 @@ func (s *ErrandsServer) createErrand(c *gin.Context) {
 }
 
 func (s *ErrandsServer) saveErrand(errand *schemas.Errand) error {
-	if !utils.ContainsStatus(schemas.ErrandStatuses, errand.Status) {
+	if !ContainsStatus(schemas.ErrandStatuses, errand.Status) {
 		return errors.New("invalid errand status state")
 	}
 
@@ -295,4 +295,14 @@ func (s *ErrandsServer) clearErrands(c *gin.Context) {
 		"status":  "OK",
 		"results": errands,
 	})
+}
+
+func ContainsStatus(slice []schemas.Status, status schemas.Status) bool {
+	for _, s := range slice {
+		if s == status {
+			return true
+		}
+	}
+
+	return false
 }

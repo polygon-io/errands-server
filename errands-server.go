@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	errandsDBPathSuffix = "errands/"
+	errandsDBPathSuffix   = "errands/"
 	pipelinesDBPathSuffix = "pipelines/"
 )
 
