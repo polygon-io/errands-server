@@ -1,5 +1,4 @@
 // Memorydb provides a key value store.
-//nolint:golint,stylecheck // TODO
 package memorydb
 
 import (

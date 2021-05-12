@@ -1,4 +1,3 @@
-//nolint:golint // TODO
 package main
 
 import (

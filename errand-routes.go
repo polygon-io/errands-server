@@ -1,4 +1,3 @@
-//nolint:golint // TODO
 package main
 
 import (
@@ -19,7 +18,6 @@ type UpdateRequest struct {
 	Logs     []string `json:"logs"`
 }
 
-//nolint:gocognit // TODO
 func (s *ErrandsServer) updateErrand(c *gin.Context) {
 	var (
 		updatedErrand *schemas.Errand
@@ -127,7 +125,6 @@ type CompletedRequest struct {
 	Results *gin.H `json:"results"`
 }
 
-//nolint:gocognit // TODO
 func (s *ErrandsServer) completeErrand(c *gin.Context) {
 	var (
 		updatedErrand *schemas.Errand
@@ -253,7 +250,6 @@ func (s *ErrandsServer) deleteErrand(c *gin.Context) {
 	})
 }
 
-//nolint:unparam // Fix this later.
 func (s *ErrandsServer) deleteErrandByID(id string) {
 	s.Store.Delete(id)
 }
