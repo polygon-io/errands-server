@@ -37,9 +37,6 @@ type dependencyGraph struct {
 	// errands maps errand names to the errands themselves for quick look-ups
 	errands map[string]Errand
 
-	// graph is the graph of errand name to a slice of errands that it depends on.
-	// A key in this map with an empty slice for a value implies that errand has no dependencies.
-
 	// dependencyToDependents maps an errand to a slice of errands that depend on it.
 	// ie dependencyToDependents["A"] = []{"B"} -> "B" depends on "A"
 	dependencyToDependents map[string][]Errand
