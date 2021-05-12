@@ -2,8 +2,6 @@ package schemas
 
 import (
 	"fmt"
-
-	"github.com/polygon-io/ptime"
 )
 
 // Pipeline represents an errand pipeline which consists of errands and dependencies between them.
@@ -17,10 +15,12 @@ type Pipeline struct {
 	Dependencies []PipelineDependency `json:"dependencies,omitempty"`
 
 	// Attributes added by errands server
-	ID         string                        `json:"id"`
-	Status     string                        `json:"status,omitempty"`
-	StartedUTC ptime.INanosecondsRFC3339Nano `json:"started_utc"`
-	EndedUTC   ptime.INanosecondsRFC3339Nano `json:"ended_utc,omitempty"`
+	ID            string `json:"id"`
+	Status        string `json:"status,omitempty"`
+
+	// TODO: use ptime once that's public
+	StartedMillis int64  `json:"startedMillis"`
+	EndedMillis   int64  `json:"endedMillis,omitempty"`
 }
 
 // PipelineDependency describes a dependency between errands within a pipeline.
