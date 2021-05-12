@@ -90,15 +90,13 @@ func (p *Pipeline) Validate() error {
 // buildDependencyGraph constructs a dependencyGraph for this pipeline.
 // This function assumes the errands and dependencies have been validated already.
 func (p *Pipeline) buildDependencyGraph() dependencyGraph {
-	// Map of errand name to actual errand
 	g := dependencyGraph{
 		errands:                 make(map[string]Errand, len(p.Errands)),
 		dependencyToDependents:  make(map[string][]Errand, len(p.Errands)),
 		dependentToDependencies: make(map[string][]Errand, len(p.Errands)),
 	}
 
-	// Build up the errand map and
-	// initialize the graph with all errands and no dependencies
+	// Build up the errand map and initialize the graph with all errands and no dependencies
 	for _, errand := range p.Errands {
 		g.errands[errand.Name] = errand
 		g.dependencyToDependents[errand.Name] = []Errand{}
