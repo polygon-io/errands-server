@@ -4,8 +4,9 @@ package schemas
 import (
 	"fmt"
 
-	uuid "github.com/google/uuid"
-	utils "github.com/polygon-io/errands-server/utils"
+	"github.com/google/uuid"
+
+	"github.com/polygon-io/errands-server/utils"
 )
 
 var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
