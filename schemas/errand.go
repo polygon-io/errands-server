@@ -11,7 +11,8 @@ import (
 
 type Status string
 
-var (
+// All the possible statuses for errands or pipelines.
+const (
 	StatusBlocked   Status = "blocked"
 	StatusInactive  Status = "inactive"
 	StatusActive    Status = "active"
@@ -19,6 +20,7 @@ var (
 	StatusCompleted Status = "completed"
 )
 
+// ErrandStatuses is a slice of all valid statuses.
 var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, StatusFailed, StatusCompleted}
 
 //easyjson:json
@@ -51,8 +53,6 @@ type Errand struct {
 	PipelineID string `json:"pipeline,omitempty"`
 }
 
-var LogSeverities = []string{"INFO", "WARNING", "ERROR"}
-
 //easyjson:json
 type Log struct {
 	Severity  string `json:"severity" binding:"required"`
@@ -82,7 +82,8 @@ func (e *Errand) SetDefaults() {
 }
 
 func (e *Errand) AddToLogs(severity, message string) error {
-	if !utils.Contains(LogSeverities, severity) {
+	validSeverities := []string{"INFO", "WARNING", "ERROR"}
+	if !utils.Contains(validSeverities, severity) {
 		return fmt.Errorf("invalid log severity: %s", severity)
 	}
 
