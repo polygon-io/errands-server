@@ -9,7 +9,7 @@ import (
 	"github.com/polygon-io/errands-server/utils"
 )
 
-var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
+var ErrandStatuses = []string{"blocked", "inactive", "active", "failed", "completed"}
 
 //easyjson:json
 type Errand struct {
@@ -36,9 +36,12 @@ type Errand struct {
 	Failed    int64   `json:"failed,omitempty"`    // Timestamp of last Fail
 	Completed int64   `json:"compelted,omitempty"` // Timestamp of last Fail
 	Logs      []Log   `json:"logs,omitempty"`
+
+	// PipelineID is the ID of the pipeline that this errand belongs to (if any)
+	PipelineID string `json:"pipeline,omitempty"`
 }
 
-var LogSeverities []string = []string{"INFO", "WARNING", "ERROR"}
+var LogSeverities = []string{"INFO", "WARNING", "ERROR"}
 
 //easyjson:json
 type Log struct {

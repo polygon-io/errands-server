@@ -73,7 +73,7 @@ func (s *ErrandsServer) createErrand(c *gin.Context) {
 	}
 
 	item.SetDefaults()
-	s.Store.SetDefault(item.ID, item)
+	s.ErrandStore.SetDefault(item.ID, item)
 	s.AddNotification("created", &item)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "OK",
@@ -86,7 +86,7 @@ func (s *ErrandsServer) saveErrand(errand *schemas.Errand) error {
 		return errors.New("invalid errand status state")
 	}
 
-	s.Store.SetDefault(errand.ID, *errand)
+	s.ErrandStore.SetDefault(errand.ID, *errand)
 
 	return nil
 }
@@ -191,7 +191,7 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 	errands := make([]schemas.Errand, 0)
 	typeFilter := c.Param("type")
 
-	for _, itemObj := range s.Store.Items() {
+	for _, itemObj := range s.ErrandStore.Items() {
 		item := itemObj.Object.(schemas.Errand)
 
 		if item.Status != "inactive" {
@@ -241,7 +241,7 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 func (s *ErrandsServer) GetErrandsBy(fn func(*schemas.Errand) bool) []schemas.Errand {
 	errands := make([]schemas.Errand, 0)
 
-	for _, itemObj := range s.Store.Items() {
+	for _, itemObj := range s.ErrandStore.Items() {
 		errand := itemObj.Object.(schemas.Errand)
 		if fn(&errand) {
 			errands = append(errands, errand)
@@ -265,7 +265,7 @@ func (s *ErrandsServer) clearErrands(c *gin.Context) {
 	threshold := time.Now().Add(-duration)
 	errands := make([]schemas.Errand, 0)
 
-	for _, itemObj := range s.Store.Items() {
+	for _, itemObj := range s.ErrandStore.Items() {
 		item := itemObj.Object.(schemas.Errand)
 
 		var stoppedRunning int64

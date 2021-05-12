@@ -16,12 +16,12 @@ type Pipeline struct {
 	Dependencies []PipelineDependency `json:"dependencies,omitempty"`
 
 	// Attributes added by errands server
-	ID            string `json:"id"`
-	Status        string `json:"status,omitempty"`
+	ID     string `json:"id"`
+	Status string `json:"status,omitempty"`
 
 	// TODO: use ptime once that's public
-	StartedMillis int64  `json:"startedMillis"`
-	EndedMillis   int64  `json:"endedMillis,omitempty"`
+	StartedMillis int64 `json:"startedMillis"`
+	EndedMillis   int64 `json:"endedMillis,omitempty"`
 }
 
 // PipelineDependency describes a dependency between errands within a pipeline.

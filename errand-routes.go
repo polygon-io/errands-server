@@ -241,7 +241,7 @@ func (s *ErrandsServer) logToErrand(c *gin.Context) {
 }
 
 func (s *ErrandsServer) deleteErrand(c *gin.Context) {
-	s.Store.Delete(c.Param("id"))
+	s.ErrandStore.Delete(c.Param("id"))
 
 	s.deleteErrandByID(c.Param("id"))
 
@@ -251,12 +251,12 @@ func (s *ErrandsServer) deleteErrand(c *gin.Context) {
 }
 
 func (s *ErrandsServer) deleteErrandByID(id string) {
-	s.Store.Delete(id)
+	s.ErrandStore.Delete(id)
 }
 
 // UpdateErrandByID Lets you pass in a function which will be called allowing you to update the errand. If no error is returned, the errand will be saved in the DB with the new attributes.
 func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) error) (*schemas.Errand, error) {
-	errandObj, found := s.Store.Get(id)
+	errandObj, found := s.ErrandStore.Get(id)
 	if !found {
 		return nil, errors.New("errand with this ID not found")
 	}
@@ -266,7 +266,7 @@ func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) err
 		return nil, errors.New("error in given update function (fn)")
 	}
 
-	s.Store.SetDefault(id, errand)
+	s.ErrandStore.SetDefault(id, errand)
 
 	return &errand, nil
 }
