@@ -82,7 +82,7 @@ func (s *ErrandsServer) createErrand(c *gin.Context) {
 }
 
 func (s *ErrandsServer) saveErrand(errand *schemas.Errand) error {
-	if !utils.Contains(schemas.ErrandStatuses, errand.Status) {
+	if !utils.ContainsStatus(schemas.ErrandStatuses, errand.Status) {
 		return errors.New("invalid errand status state")
 	}
 
@@ -109,7 +109,7 @@ func (s *ErrandsServer) getFilteredErrands(c *gin.Context) {
 	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
-			return errand.Status == value
+			return string(errand.Status) == value
 		case "type":
 			return errand.Type == value
 		default:
@@ -146,7 +146,7 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 	errands := s.GetErrandsBy(func(errand *schemas.Errand) bool {
 		switch key {
 		case "status":
-			return errand.Status == value
+			return string(errand.Status) == value
 		case "type":
 			return errand.Type == value
 		default:
@@ -161,7 +161,8 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 			s.deleteErrandByID(errand.ID)
 		} else if updateReq.Status != "" {
 			_, err = s.UpdateErrandByID(errand.ID, func(e *schemas.Errand) error {
-				e.Status = updateReq.Status
+				// TODO: update errand in pipeline
+				e.Status = schemas.Status(updateReq.Status)
 				return nil
 			})
 			if err != nil {
@@ -194,7 +195,7 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 	for _, itemObj := range s.ErrandStore.Items() {
 		item := itemObj.Object.(schemas.Errand)
 
-		if item.Status != "inactive" {
+		if item.Status != schemas.StatusInactive {
 			continue
 		}
 

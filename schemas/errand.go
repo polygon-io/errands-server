@@ -9,7 +9,17 @@ import (
 	"github.com/polygon-io/errands-server/utils"
 )
 
-var ErrandStatuses = []string{"blocked", "inactive", "active", "failed", "completed"}
+type Status string
+
+var (
+	StatusBlocked   Status = "blocked"
+	StatusInactive  Status = "inactive"
+	StatusActive    Status = "active"
+	StatusFailed    Status = "failed"
+	StatusCompleted Status = "completed"
+)
+
+var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, StatusFailed, StatusCompleted}
 
 //easyjson:json
 type Errand struct {
@@ -26,7 +36,7 @@ type Errand struct {
 	} `json:"options"`
 	Data    map[string]interface{} `json:"data,omitempty"`
 	Created int64                  `json:"created"`
-	Status  string                 `json:"status,omitempty"`
+	Status  Status                 `json:"status,omitempty"`
 	Results map[string]interface{} `json:"results,omitempty"`
 
 	// Internal attributes:

@@ -15,7 +15,7 @@ func TestPipelineValidate(t *testing.T) {
 	t.Run("errands with duplicate name", func(t *testing.T) {
 		p := Pipeline{
 			Name: "duplicate name",
-			Errands: []Errand{{
+			Errands: []*Errand{{
 				Name: "errand",
 			}, {
 				Name: "errand",
@@ -28,8 +28,8 @@ func TestPipelineValidate(t *testing.T) {
 	t.Run("errand with self dependency", func(t *testing.T) {
 		p := Pipeline{
 			Name:    "self dependency",
-			Errands: []Errand{{Name: "single errand"}},
-			Dependencies: []PipelineDependency{{
+			Errands: []*Errand{{Name: "single errand"}},
+			Dependencies: []*PipelineDependency{{
 				Target:    "single errand",
 				DependsOn: "single errand",
 			}},
@@ -41,8 +41,8 @@ func TestPipelineValidate(t *testing.T) {
 	t.Run("dependency with invalid target", func(t *testing.T) {
 		p := Pipeline{
 			Name:    "self dependency",
-			Errands: []Errand{{Name: "single errand"}},
-			Dependencies: []PipelineDependency{{
+			Errands: []*Errand{{Name: "single errand"}},
+			Dependencies: []*PipelineDependency{{
 				Target:    "not a real errand",
 				DependsOn: "single errand",
 			}},
@@ -54,8 +54,8 @@ func TestPipelineValidate(t *testing.T) {
 	t.Run("dependency with invalid dependsOn", func(t *testing.T) {
 		p := Pipeline{
 			Name:    "self dependency",
-			Errands: []Errand{{Name: "single errand"}},
-			Dependencies: []PipelineDependency{{
+			Errands: []*Errand{{Name: "single errand"}},
+			Dependencies: []*PipelineDependency{{
 				Target:    "single errand",
 				DependsOn: "not a real dependency",
 			}},
@@ -70,11 +70,11 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "simple dependency cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "A", DependsOn: "B"},
 				{Target: "B", DependsOn: "A"},
 			},
@@ -89,12 +89,12 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "strongly connected cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "A", DependsOn: "B"},
 				{Target: "B", DependsOn: "A"},
 			},
@@ -109,12 +109,12 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "single graph with cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "A", DependsOn: "B"},
 				{Target: "B", DependsOn: "C"},
 				{Target: "B", DependsOn: "A"},
@@ -130,7 +130,7 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "strongly connected cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
@@ -138,7 +138,7 @@ func TestPipelineValidate(t *testing.T) {
 				{Name: "E"},
 				{Name: "F"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "A", DependsOn: "B"},
 				{Target: "B", DependsOn: "C"},
 				{Target: "B", DependsOn: "A"},
@@ -157,7 +157,7 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "strongly connected cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
@@ -165,7 +165,7 @@ func TestPipelineValidate(t *testing.T) {
 				{Name: "E"},
 				{Name: "F"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "A", DependsOn: "B"},
 				{Target: "B", DependsOn: "C"},
 
@@ -185,13 +185,13 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "single graph with cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
 				{Name: "D"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "B", DependsOn: "A"},
 				{Target: "C", DependsOn: "B"},
 				{Target: "D", DependsOn: "A"},
@@ -209,14 +209,14 @@ func TestPipelineValidate(t *testing.T) {
 		*/
 		p := Pipeline{
 			Name: "single graph with cycle",
-			Errands: []Errand{
+			Errands: []*Errand{
 				{Name: "A"},
 				{Name: "B"},
 				{Name: "C"},
 				{Name: "D"},
 				{Name: "E"},
 			},
-			Dependencies: []PipelineDependency{
+			Dependencies: []*PipelineDependency{
 				{Target: "B", DependsOn: "A"},
 				{Target: "C", DependsOn: "B"},
 				{Target: "C", DependsOn: "D"},

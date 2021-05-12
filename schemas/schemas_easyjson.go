@@ -17,7 +17,279 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(in *jlexer.Lexer, out *Log) {
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(in *jlexer.Lexer, out *PipelineDependency) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "target":
+			out.Target = string(in.String())
+		case "dependsOn":
+			out.DependsOn = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(out *jwriter.Writer, in PipelineDependency) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"target\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Target))
+	}
+	{
+		const prefix string = ",\"dependsOn\":"
+		out.RawString(prefix)
+		out.String(string(in.DependsOn))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v PipelineDependency) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v PipelineDependency) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *PipelineDependency) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *PipelineDependency) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(l, v)
+}
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Lexer, out *Pipeline) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "name":
+			out.Name = string(in.String())
+		case "deleteOnCompleted":
+			out.DeleteOnCompleted = bool(in.Bool())
+		case "errands":
+			if in.IsNull() {
+				in.Skip()
+				out.Errands = nil
+			} else {
+				in.Delim('[')
+				if out.Errands == nil {
+					if !in.IsDelim(']') {
+						out.Errands = make([]*Errand, 0, 8)
+					} else {
+						out.Errands = []*Errand{}
+					}
+				} else {
+					out.Errands = (out.Errands)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v1 *Errand
+					if in.IsNull() {
+						in.Skip()
+						v1 = nil
+					} else {
+						if v1 == nil {
+							v1 = new(Errand)
+						}
+						(*v1).UnmarshalEasyJSON(in)
+					}
+					out.Errands = append(out.Errands, v1)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "dependencies":
+			if in.IsNull() {
+				in.Skip()
+				out.Dependencies = nil
+			} else {
+				in.Delim('[')
+				if out.Dependencies == nil {
+					if !in.IsDelim(']') {
+						out.Dependencies = make([]*PipelineDependency, 0, 8)
+					} else {
+						out.Dependencies = []*PipelineDependency{}
+					}
+				} else {
+					out.Dependencies = (out.Dependencies)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v2 *PipelineDependency
+					if in.IsNull() {
+						in.Skip()
+						v2 = nil
+					} else {
+						if v2 == nil {
+							v2 = new(PipelineDependency)
+						}
+						(*v2).UnmarshalEasyJSON(in)
+					}
+					out.Dependencies = append(out.Dependencies, v2)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "id":
+			out.ID = string(in.String())
+		case "status":
+			out.Status = string(in.String())
+		case "startedMillis":
+			out.StartedMillis = int64(in.Int64())
+		case "endedMillis":
+			out.EndedMillis = int64(in.Int64())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.Writer, in Pipeline) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"name\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Name))
+	}
+	if in.DeleteOnCompleted {
+		const prefix string = ",\"deleteOnCompleted\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.DeleteOnCompleted))
+	}
+	if len(in.Errands) != 0 {
+		const prefix string = ",\"errands\":"
+		out.RawString(prefix)
+		{
+			out.RawByte('[')
+			for v3, v4 := range in.Errands {
+				if v3 > 0 {
+					out.RawByte(',')
+				}
+				if v4 == nil {
+					out.RawString("null")
+				} else {
+					(*v4).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	if len(in.Dependencies) != 0 {
+		const prefix string = ",\"dependencies\":"
+		out.RawString(prefix)
+		{
+			out.RawByte('[')
+			for v5, v6 := range in.Dependencies {
+				if v5 > 0 {
+					out.RawByte(',')
+				}
+				if v6 == nil {
+					out.RawString("null")
+				} else {
+					(*v6).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix)
+		out.String(string(in.ID))
+	}
+	if in.Status != "" {
+		const prefix string = ",\"status\":"
+		out.RawString(prefix)
+		out.String(string(in.Status))
+	}
+	{
+		const prefix string = ",\"startedMillis\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.StartedMillis))
+	}
+	if in.EndedMillis != 0 {
+		const prefix string = ",\"endedMillis\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.EndedMillis))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Pipeline) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Pipeline) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Pipeline) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Pipeline) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(l, v)
+}
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas2(in *jlexer.Lexer, out *Log) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -52,38 +324,23 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(in *jlexer.Lex
 		in.Consumed()
 	}
 }
-func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(out *jwriter.Writer, in Log) {
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas2(out *jwriter.Writer, in Log) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"severity\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Severity))
 	}
 	{
 		const prefix string = ",\"message\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Message))
 	}
 	{
 		const prefix string = ",\"timestamp\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.Timestamp))
 	}
 	out.RawByte('}')
@@ -92,27 +349,27 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(out *jwriter.W
 // MarshalJSON supports json.Marshaler interface
 func (v Log) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(&w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Log) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas(w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Log) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(&r, v)
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Log) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas(l, v)
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas2(l, v)
 }
-func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Lexer, out *Errand) {
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(in *jlexer.Lexer, out *Errand) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -152,15 +409,15 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v1 interface{}
-					if m, ok := v1.(easyjson.Unmarshaler); ok {
+					var v7 interface{}
+					if m, ok := v7.(easyjson.Unmarshaler); ok {
 						m.UnmarshalEasyJSON(in)
-					} else if m, ok := v1.(json.Unmarshaler); ok {
+					} else if m, ok := v7.(json.Unmarshaler); ok {
 						_ = m.UnmarshalJSON(in.Raw())
 					} else {
-						v1 = in.Interface()
+						v7 = in.Interface()
 					}
-					(out.Data)[key] = v1
+					(out.Data)[key] = v7
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -168,7 +425,7 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 		case "created":
 			out.Created = int64(in.Int64())
 		case "status":
-			out.Status = string(in.String())
+			out.Status = Status(in.String())
 		case "results":
 			if in.IsNull() {
 				in.Skip()
@@ -182,15 +439,15 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v2 interface{}
-					if m, ok := v2.(easyjson.Unmarshaler); ok {
+					var v8 interface{}
+					if m, ok := v8.(easyjson.Unmarshaler); ok {
 						m.UnmarshalEasyJSON(in)
-					} else if m, ok := v2.(json.Unmarshaler); ok {
+					} else if m, ok := v8.(json.Unmarshaler); ok {
 						_ = m.UnmarshalJSON(in.Raw())
 					} else {
-						v2 = in.Interface()
+						v8 = in.Interface()
 					}
-					(out.Results)[key] = v2
+					(out.Results)[key] = v8
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -221,13 +478,15 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 					out.Logs = (out.Logs)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v3 Log
-					(v3).UnmarshalEasyJSON(in)
-					out.Logs = append(out.Logs, v3)
+					var v9 Log
+					(v9).UnmarshalEasyJSON(in)
+					out.Logs = append(out.Logs, v9)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
+		case "pipeline":
+			out.PipelineID = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -238,75 +497,50 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.Writer, in Errand) {
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(out *jwriter.Writer, in Errand) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ID))
 	}
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Name))
 	}
 	{
 		const prefix string = ",\"type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Type))
 	}
 	{
 		const prefix string = ",\"options\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		easyjson2189435aEncode(out, in.Options)
 	}
 	if len(in.Data) != 0 {
 		const prefix string = ",\"data\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('{')
-			v4First := true
-			for v4Name, v4Value := range in.Data {
-				if v4First {
-					v4First = false
+			v10First := true
+			for v10Name, v10Value := range in.Data {
+				if v10First {
+					v10First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v4Name))
+				out.String(string(v10Name))
 				out.RawByte(':')
-				if m, ok := v4Value.(easyjson.Marshaler); ok {
+				if m, ok := v10Value.(easyjson.Marshaler); ok {
 					m.MarshalEasyJSON(out)
-				} else if m, ok := v4Value.(json.Marshaler); ok {
+				} else if m, ok := v10Value.(json.Marshaler); ok {
 					out.Raw(m.MarshalJSON())
 				} else {
-					out.Raw(json.Marshal(v4Value))
+					out.Raw(json.Marshal(v10Value))
 				}
 			}
 			out.RawByte('}')
@@ -314,49 +548,34 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 	}
 	{
 		const prefix string = ",\"created\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.Created))
 	}
 	if in.Status != "" {
 		const prefix string = ",\"status\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Status))
 	}
 	if len(in.Results) != 0 {
 		const prefix string = ",\"results\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('{')
-			v5First := true
-			for v5Name, v5Value := range in.Results {
-				if v5First {
-					v5First = false
+			v11First := true
+			for v11Name, v11Value := range in.Results {
+				if v11First {
+					v11First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v5Name))
+				out.String(string(v11Name))
 				out.RawByte(':')
-				if m, ok := v5Value.(easyjson.Marshaler); ok {
+				if m, ok := v11Value.(easyjson.Marshaler); ok {
 					m.MarshalEasyJSON(out)
-				} else if m, ok := v5Value.(json.Marshaler); ok {
+				} else if m, ok := v11Value.(json.Marshaler); ok {
 					out.Raw(m.MarshalJSON())
 				} else {
-					out.Raw(json.Marshal(v5Value))
+					out.Raw(json.Marshal(v11Value))
 				}
 			}
 			out.RawByte('}')
@@ -364,72 +583,47 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 	}
 	{
 		const prefix string = ",\"progress\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.Progress))
 	}
 	{
 		const prefix string = ",\"attempts\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.Attempts))
 	}
 	if in.Started != 0 {
 		const prefix string = ",\"started\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.Started))
 	}
 	if in.Failed != 0 {
 		const prefix string = ",\"failed\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.Failed))
 	}
 	if in.Completed != 0 {
 		const prefix string = ",\"compelted\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int64(int64(in.Completed))
 	}
 	if len(in.Logs) != 0 {
 		const prefix string = ",\"logs\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v6, v7 := range in.Logs {
-				if v6 > 0 {
+			for v12, v13 := range in.Logs {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				(v7).MarshalEasyJSON(out)
+				(v13).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
+	}
+	if in.PipelineID != "" {
+		const prefix string = ",\"pipeline\":"
+		out.RawString(prefix)
+		out.String(string(in.PipelineID))
 	}
 	out.RawByte('}')
 }
@@ -437,25 +631,25 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v Errand) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(&w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Errand) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas1(w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Errand) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(&r, v)
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Errand) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(l, v)
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(l, v)
 }
 func easyjson2189435aDecode(in *jlexer.Lexer, out *struct {
 	TTL               int  `json:"ttl,omitempty"`
@@ -510,12 +704,8 @@ func easyjson2189435aEncode(out *jwriter.Writer, in struct {
 	_ = first
 	if in.TTL != 0 {
 		const prefix string = ",\"ttl\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		first = false
+		out.RawString(prefix[1:])
 		out.Int(int(in.TTL))
 	}
 	if in.Retries != 0 {

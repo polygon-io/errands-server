@@ -266,6 +266,8 @@ func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) err
 		return nil, errors.New("error in given update function (fn)")
 	}
 
+	s.updateErrandInPipeline(&errand)
+
 	s.ErrandStore.SetDefault(id, errand)
 
 	return &errand, nil

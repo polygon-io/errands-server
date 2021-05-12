@@ -12,8 +12,8 @@ type Pipeline struct {
 	Name              string `json:"name" binding:"required"`
 	DeleteOnCompleted bool   `json:"deleteOnCompleted,omitempty"`
 
-	Errands      []Errand             `json:"errands,omitempty" binding:"required"`
-	Dependencies []PipelineDependency `json:"dependencies,omitempty"`
+	Errands      []*Errand             `json:"errands,omitempty" binding:"required"`
+	Dependencies []*PipelineDependency `json:"dependencies,omitempty"`
 
 	// Attributes added by errands server
 	ID     string `json:"id"`
@@ -36,16 +36,16 @@ type PipelineDependency struct {
 
 type dependencyGraph struct {
 	// errands maps errand names to the errands themselves for quick look-ups
-	errands map[string]Errand
+	errands map[string]*Errand
 
 	// dependencyToDependents maps an errand to a slice of errands that depend on it.
 	// ie dependencyToDependents["A"] = []{"B"} -> "B" depends on "A"
-	dependencyToDependents map[string][]Errand
+	dependencyToDependents map[string][]*Errand
 
 	// dependentToDependencies maps an errand to a slice of errands that it depends on.
 	// This is the transpose of dependencyToDependents.
 	// ie dependentToDependencies["B"] = []{"A"} -> "B" depends on "A"
-	dependentToDependencies map[string][]Errand
+	dependentToDependencies map[string][]*Errand
 }
 
 // Validate checks that the pipeline describes a valid dependency graph and returns a user-friendly error if the pipeline is invalid.
@@ -55,7 +55,7 @@ func (p *Pipeline) Validate() error {
 	}
 
 	// Map of errand name to errand schema
-	errandMap := make(map[string]Errand, len(p.Errands))
+	errandMap := make(map[string]*Errand, len(p.Errands))
 
 	// Build up map of errand name to errand, and double check there are no errands with duplicate names
 	for _, errand := range p.Errands {
@@ -85,20 +85,24 @@ func (p *Pipeline) Validate() error {
 	return p.buildDependencyGraph().checkForDependencyCycles()
 }
 
+func (p *Pipeline) GetUnblockedErrands() []*Errand {
+	return p.buildDependencyGraph().findUnblockedErrands()
+}
+
 // buildDependencyGraph constructs a dependencyGraph for this pipeline.
 // This function assumes the errands and dependencies have been validated already.
 func (p *Pipeline) buildDependencyGraph() dependencyGraph {
 	g := dependencyGraph{
-		errands:                 make(map[string]Errand, len(p.Errands)),
-		dependencyToDependents:  make(map[string][]Errand, len(p.Errands)),
-		dependentToDependencies: make(map[string][]Errand, len(p.Errands)),
+		errands:                 make(map[string]*Errand, len(p.Errands)),
+		dependencyToDependents:  make(map[string][]*Errand, len(p.Errands)),
+		dependentToDependencies: make(map[string][]*Errand, len(p.Errands)),
 	}
 
 	// Build up the errand map and initialize the graph with all errands and no dependencies
 	for _, errand := range p.Errands {
 		g.errands[errand.Name] = errand
-		g.dependencyToDependents[errand.Name] = []Errand{}
-		g.dependentToDependencies[errand.Name] = []Errand{}
+		g.dependencyToDependents[errand.Name] = []*Errand{}
+		g.dependentToDependencies[errand.Name] = []*Errand{}
 	}
 
 	// Fill in the dependencies
@@ -110,12 +114,22 @@ func (p *Pipeline) buildDependencyGraph() dependencyGraph {
 	return g
 }
 
-// findIndependentErrands returns a slice of errands that have no dependencies blocking them.
-func (g dependencyGraph) findIndependentErrands() []Errand {
-	var independentErrands []Errand
+// findUnblockedErrands returns a slice of errands that have no dependencies blocking them.
+func (g dependencyGraph) findUnblockedErrands() []*Errand {
+	var independentErrands []*Errand
 
 	for dependent, dependencies := range g.dependentToDependencies {
-		if len(dependencies) == 0 {
+		var blocked bool
+
+		// This dependent is blocked if any of its dependencies are not completed
+		for _, dependency := range dependencies {
+			if dependency.Status != StatusCompleted {
+				blocked = true
+				break
+			}
+		}
+
+		if !blocked {
 			independentErrands = append(independentErrands, g.errands[dependent])
 		}
 	}
@@ -125,7 +139,7 @@ func (g dependencyGraph) findIndependentErrands() []Errand {
 
 // checkForDependencyCycles returns an error if it finds a cyclic dependency in the dependencyGraph.
 func (g dependencyGraph) checkForDependencyCycles() error {
-	independentErrands := g.findIndependentErrands()
+	independentErrands := g.findUnblockedErrands()
 	if len(independentErrands) == 0 {
 		return fmt.Errorf("dependency cycle found; all errands have dependencies")
 	}
