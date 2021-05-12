@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -50,7 +51,7 @@ type dependencyGraph struct {
 // Validate checks that the pipeline describes a valid dependency graph and returns a user-friendly error if the pipeline is invalid.
 func (p *Pipeline) Validate() error {
 	if len(p.Errands) == 0 {
-		return fmt.Errorf("no errands specified in pipeline")
+		return errors.New("no errands specified in pipeline")
 	}
 
 	// Map of errand name to errand schema
@@ -126,7 +127,7 @@ func (g dependencyGraph) findIndependentErrands() []Errand {
 func (g dependencyGraph) checkForDependencyCycles() error {
 	independentErrands := g.findIndependentErrands()
 	if len(independentErrands) == 0 {
-		return fmt.Errorf("no independent errands found; a cycle must exist")
+		return fmt.Errorf("dependency cycle found; all errands have dependencies")
 	}
 
 	// Prime the visit stack with the first independent errand and remove it from the list.

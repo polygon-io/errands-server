@@ -80,7 +80,7 @@ func TestPipelineValidate(t *testing.T) {
 			},
 		}
 
-		assert.EqualError(t, p.Validate(), "no independent errands found; a cycle must exist")
+		assert.EqualError(t, p.Validate(), "dependency cycle found; all errands have dependencies")
 	})
 
 	t.Run("strongly connected subgraph cycle", func(t *testing.T) {
