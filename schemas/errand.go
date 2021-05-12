@@ -4,28 +4,10 @@ package schemas
 import (
 	"fmt"
 
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 
-	utils "github.com/polygon-io/errands-server/utils"
+	"github.com/polygon-io/errands-server/utils"
 )
-
-//easyjson:json
-type Pipeline struct {
-	Name              string `json:"name" binding:"required"`
-	DeleteOnCompleted bool   `json:"deleteOnCompleted,omitempty"`
-
-	Errands      []Errand             `json:"errands" binding:"required"`
-	Dependencies []PipelineDependency `json:"dependencies,omitempty"`
-}
-
-//easyjson:json
-type PipelineDependency struct {
-	// Target is the name of the errand within the pipeline that this dependency relates to
-	Target string `json:"target" binding:"required"`
-
-	// DependsOn is the name of the errand within the pipeline that the Target errand depends on
-	DependsOn string `json:"dependsOn" binding:"required"`
-}
 
 var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
 
