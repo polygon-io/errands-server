@@ -179,9 +179,9 @@ func TestPipelineValidate(t *testing.T) {
 
 	t.Run("single graph happy path | diverging", func(t *testing.T) {
 		/*
-			        |--> D
-				A --|
-			 	    |--> B --> C
+			    |--> D
+			A --|
+			    |--> B --> C
 		*/
 		p := Pipeline{
 			Name: "single graph with cycle",
@@ -203,9 +203,9 @@ func TestPipelineValidate(t *testing.T) {
 
 	t.Run("single graph happy path | converging", func(t *testing.T) {
 		/*
-				A --> B --|
-			              |--> C --> E
-			          D --|
+			A --> B --|
+			          |--> C --> E
+			      D --|
 		*/
 		p := Pipeline{
 			Name: "single graph with cycle",
