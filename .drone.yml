@@ -24,7 +24,15 @@ steps:
   volumes:
   - name: deps
     path: /go/pkg
-    
+
+- name: easyjson
+  image: polygonio/tool-serialization:latest
+  commands:
+    - ./_bin_/check_easyjson
+  volumes:
+    - name: deps
+      path: /go/pkg
+
 - name: test
   image: golang:1.14
   commands:
@@ -45,5 +53,74 @@ trigger:
   - master
   event:
   - pull_request
+
+---
+kind: pipeline
+type: docker
+name: latest docker image
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: build
+    image: golang:1.14
+    commands:
+      - go build .
+
+  - name: docker-push
+    image: plugins/docker
+    settings:
+      password:
+        from_secret: dockerhub_password
+      repo: polygonio/errands-server
+      tag:
+        - ${DRONE_BRANCH/master/latest}
+        - ${DRONE_COMMIT}
+      username:
+        from_secret: dockerhub_username
+
+trigger:
+  branch:
+    - master
+  event:
+    - push
+
+---
+kind: pipeline
+type: docker
+name: release docker image
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: build
+    image: golang:1.14
+    commands:
+      - go build .
+
+  - name: docker-push
+    image: plugins/docker
+    settings:
+      password:
+        from_secret: dockerhub_password
+      repo: polygonio/errands-server
+      tag:
+        - ${DRONE_TAG}
+      username:
+        from_secret: dockerhub_username
+
+trigger:
+  event:
+    - tag
+  ref:
+    - refs/tags/**
+
+---
+kind: signature
+hmac: 1dbd9d26dd146825051b84fd5aaf59b4f2cd3799d829f375b86e2b0af36aeaba
 
 ...

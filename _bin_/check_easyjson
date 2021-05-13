@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+pkgs=(schemas)
+
+for pkg in "${pkgs[@]}"; do
+	cp ${pkg}/${pkg}_easyjson.go ${pkg}/${pkg}_easyjson.go.check
+
+	easyjson -pkg ${pkg}
+	failed=$(diff ${pkg}/${pkg}_easyjson.go.check ${pkg}/${pkg}_easyjson.go) || echo "Run \`easyjson -pkg ${pkg}\` and update HEAD"
+
+	# restore easyjson code
+	git checkout ${pkg}/${pkg}_easyjson.go
+	rm ${pkg}/${pkg}_easyjson.go.check
+
+	if [[ "$(echo -n "${failed}" | wc -w)" -ne "0" ]]; then
+		exit 1
+	fi
+done
