@@ -43,7 +43,7 @@ func (s *ErrandsServer) createPipeline(c *gin.Context) {
 
 	// Set the ID and status of the pipeline
 	pipeline.ID = uuid.New().String()
-	pipeline.Status = "inactive"
+	pipeline.Status = schemas.StatusInactive
 	pipeline.StartedMillis = utils.GetTimestamp()
 
 	// Initialize all the errands in the pipeline
@@ -112,6 +112,8 @@ func (s *ErrandsServer) updateErrandInPipeline(errand *schemas.Errand) {
 
 		s.ErrandStore.SetDefault(unblockedErrand.ID, *unblockedErrand)
 	}
+
+	pipeline.RecalculateStatus()
 
 	// Save the updated pipeline
 	s.PipelineStore.SetDefault(pipeline.ID, pipeline)

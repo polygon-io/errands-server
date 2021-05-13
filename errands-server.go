@@ -68,7 +68,7 @@ func NewErrandsServer(cfg *Config) *ErrandsServer {
 	}
 
 	if err := obj.ErrandStore.LoadFile(path.Join(cfg.Storage, pipelinesDBPathSuffix)); err != nil {
-		log.Warning("Could not load errand data from previous DB file.")
+		log.Warning("Could not load pipeline data from previous DB file.")
 		log.Warning("If this is your first time running, this is normal.")
 		log.Warning("If not please check the contents of your file: ", cfg.Storage)
 	}

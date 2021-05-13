@@ -3,6 +3,8 @@ package schemas
 import (
 	"errors"
 	"fmt"
+
+	"github.com/polygon-io/errands-server/utils"
 )
 
 // Pipeline represents an errand pipeline which consists of errands and dependencies between them.
@@ -17,7 +19,7 @@ type Pipeline struct {
 
 	// Attributes added by errands server
 	ID     string `json:"id"`
-	Status string `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 
 	// TODO: use ptime once that's public
 	StartedMillis int64 `json:"startedMillis"`
@@ -87,6 +89,36 @@ func (p *Pipeline) Validate() error {
 
 func (p *Pipeline) GetUnblockedErrands() []*Errand {
 	return p.buildDependencyGraph().findUnblockedErrands()
+}
+
+func (p *Pipeline) RecalculateStatus() {
+	var numCompleted int
+
+	for _, errand := range p.Errands {
+		// Failed takes precedence over everything
+		if errand.Status == StatusFailed {
+			p.Status = StatusFailed
+			break
+		}
+
+		if p.Status == StatusInactive && errand.Status == StatusActive {
+			p.Status = StatusActive
+		}
+
+		if p.Status == StatusCompleted {
+			numCompleted++
+		}
+	}
+
+	// If all the errands are completed, the pipeline is complete
+	if numCompleted == len(p.Errands) {
+		p.Status = StatusCompleted
+
+		// Update the ended timestamp if it wasn't set already
+		if p.EndedMillis == 0 {
+			p.EndedMillis = utils.GetTimestamp()
+		}
+	}
 }
 
 // buildDependencyGraph constructs a dependencyGraph for this pipeline.
