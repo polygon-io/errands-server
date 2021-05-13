@@ -9,7 +9,19 @@ import (
 	"github.com/polygon-io/errands-server/utils"
 )
 
-var ErrandStatuses []string = []string{"inactive", "active", "failed", "completed"}
+type Status string
+
+// All the possible statuses for errands or pipelines.
+const (
+	StatusBlocked   Status = "blocked"
+	StatusInactive  Status = "inactive"
+	StatusActive    Status = "active"
+	StatusFailed    Status = "failed"
+	StatusCompleted Status = "completed"
+)
+
+// ErrandStatuses is a slice of all valid statuses.
+var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, StatusFailed, StatusCompleted}
 
 //easyjson:json
 type Errand struct {
@@ -26,7 +38,7 @@ type Errand struct {
 	} `json:"options"`
 	Data    map[string]interface{} `json:"data,omitempty"`
 	Created int64                  `json:"created"`
-	Status  string                 `json:"status,omitempty"`
+	Status  Status                 `json:"status,omitempty"`
 	Results map[string]interface{} `json:"results,omitempty"`
 
 	// Internal attributes:
@@ -36,9 +48,10 @@ type Errand struct {
 	Failed    int64   `json:"failed,omitempty"`    // Timestamp of last Fail
 	Completed int64   `json:"compelted,omitempty"` // Timestamp of last Fail
 	Logs      []Log   `json:"logs,omitempty"`
-}
 
-var LogSeverities []string = []string{"INFO", "WARNING", "ERROR"}
+	// PipelineID is the ID of the pipeline that this errand belongs to (if any)
+	PipelineID string `json:"pipeline,omitempty"`
+}
 
 //easyjson:json
 type Log struct {
@@ -69,7 +82,8 @@ func (e *Errand) SetDefaults() {
 }
 
 func (e *Errand) AddToLogs(severity, message string) error {
-	if !utils.Contains(LogSeverities, severity) {
+	validSeverities := []string{"INFO", "WARNING", "ERROR"}
+	if !utils.Contains(validSeverities, severity) {
 		return fmt.Errorf("invalid log severity: %s", severity)
 	}
 

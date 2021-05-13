@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"path"
 	"reflect"
 	"time"
 
@@ -17,6 +18,11 @@ import (
 	validator "gopkg.in/go-playground/validator.v8"
 )
 
+const (
+	errandsDBPathSuffix   = "errands/"
+	pipelinesDBPathSuffix = "pipelines/"
+)
+
 //easyjson:json
 type Notification struct {
 	Event  string         `json:"event"`
@@ -26,7 +32,8 @@ type Notification struct {
 type ErrandsServer struct {
 	StorageDir       string
 	Port             string
-	Store            *store.MemoryStore
+	ErrandStore      *store.MemoryStore
+	PipelineStore    *store.MemoryStore
 	Server           *http.Server
 	API              *gin.Engine
 	ErrandsRoutes    *gin.RouterGroup
@@ -46,15 +53,22 @@ func NewErrandsServer(cfg *Config) *ErrandsServer {
 		RegisterClient:   make(chan *Client, 10),
 		UnregisterClient: make(chan *Client, 10),
 		Notifications:    make(chan *Notification, 100),
-		Store:            store.New(),
+		ErrandStore:      store.New(),
+		PipelineStore:    store.New(),
 		periodicSave:     true,
 	}
 
 	go obj.createAPI()
 	go obj.broadcastLoop()
 
-	if err := obj.Store.LoadFile(cfg.Storage); err != nil {
-		log.Warning("Could not load data from previous DB file.")
+	if err := obj.ErrandStore.LoadFile(path.Join(cfg.Storage, errandsDBPathSuffix)); err != nil {
+		log.Warning("Could not load errand data from previous DB file.")
+		log.Warning("If this is your first time running, this is normal.")
+		log.Warning("If not please check the contents of your file: ", cfg.Storage)
+	}
+
+	if err := obj.ErrandStore.LoadFile(path.Join(cfg.Storage, pipelinesDBPathSuffix)); err != nil {
+		log.Warning("Could not load errand data from previous DB file.")
 		log.Warning("If this is your first time running, this is normal.")
 		log.Warning("If not please check the contents of your file: ", cfg.Storage)
 	}
@@ -73,11 +87,19 @@ func (s *ErrandsServer) periodicallySaveDB() {
 		}
 
 		log.Info("Checkpoint saving DB to file...")
+		s.saveDBs()
+	}
+}
 
-		if err := s.Store.SaveFile(cfg.Storage); err != nil {
-			log.Error("----- Error checkpoint saving the DB to file -----")
-			log.Error(err)
-		}
+func (s *ErrandsServer) saveDBs() {
+	if err := s.ErrandStore.SaveFile(path.Join(s.StorageDir, errandsDBPathSuffix)); err != nil {
+		log.Error("----- Error checkpoint saving the errand DB to file -----")
+		log.Error(err)
+	}
+
+	if err := s.PipelineStore.SaveFile(path.Join(s.StorageDir, pipelinesDBPathSuffix)); err != nil {
+		log.Error("----- Error checkpoint saving the pipeline DB to file -----")
+		log.Error(err)
 	}
 }
 
@@ -128,10 +150,7 @@ func (s *ErrandsServer) killAPI() {
 
 func (s *ErrandsServer) killDB() {
 	log.Println("Closing the DB")
-
-	if err := s.Store.SaveFile(cfg.Storage); err != nil {
-		log.Fatal(err)
-	}
+	s.saveDBs()
 }
 
 func UserStructLevelValidation(v *validator.Validate, structLevel *validator.StructLevel) {
@@ -186,6 +205,10 @@ func (s *ErrandsServer) createAPI() {
 	s.ErrandsRoutes.POST("/update/:key/:val", s.updateFilteredErrands)
 	// Clear all finished errands older than.
 	s.ErrandsRoutes.POST("/clear/:duration", s.clearErrands)
+
+	// Singular pipeline routes
+	pipelineRoutes := s.API.Group("/v1/pipeline")
+	pipelineRoutes.POST("/", s.createPipeline)
 
 	// Prometheus metrics
 	s.ErrandRoutes.GET("/metrics", func(c *gin.Context) {

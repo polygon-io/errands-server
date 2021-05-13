@@ -20,8 +20,6 @@ import (
 
 
 */
-var cfg Config
-
 type Config struct {
 	Storage string `split_words:"true" default:"./errands.db"`
 	Port    string `split_words:"true" default:":5555"`
@@ -29,6 +27,7 @@ type Config struct {
 
 func main() {
 	// Parse Env Vars:
+	var cfg Config
 	err := envconfig.Process("ERRANDS", &cfg)
 	if err != nil {
 		log.Fatal(err)
