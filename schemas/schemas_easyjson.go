@@ -178,7 +178,7 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas1(in *jlexer.Le
 		case "id":
 			out.ID = string(in.String())
 		case "status":
-			out.Status = string(in.String())
+			out.Status = Status(in.String())
 		case "startedMillis":
 			out.StartedMillis = int64(in.Int64())
 		case "endedMillis":

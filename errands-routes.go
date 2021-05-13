@@ -161,7 +161,6 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 			s.deleteErrandByID(errand.ID)
 		} else if updateReq.Status != "" {
 			_, err = s.UpdateErrandByID(errand.ID, func(e *schemas.Errand) error {
-				// TODO: update errand in pipeline
 				e.Status = schemas.Status(updateReq.Status)
 				return nil
 			})
