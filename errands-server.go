@@ -209,6 +209,12 @@ func (s *ErrandsServer) createAPI() {
 	// Singular pipeline routes
 	pipelineRoutes := s.API.Group("/v1/pipeline")
 	pipelineRoutes.POST("/", s.createPipeline)
+	pipelineRoutes.GET("/:id", s.getPipeline)
+	pipelineRoutes.DELETE("/:id", s.deletePipeline)
+
+	// Plural pipeline routes
+	pipelinesRoutes := s.API.Group("/v1/pipelines")
+	pipelinesRoutes.GET("/", s.listPipelines)
 
 	// Prometheus metrics
 	s.ErrandRoutes.GET("/metrics", func(c *gin.Context) {
