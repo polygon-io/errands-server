@@ -217,7 +217,7 @@ func (s *ErrandsServer) createAPI() {
 	pipelinesRoutes.GET("/", s.listPipelines)
 
 	// Prometheus metrics
-	s.ErrandRoutes.GET("/metrics", func(c *gin.Context) {
+	s.API.GET("/metrics", func(c *gin.Context) {
 		promhttp.Handler().ServeHTTP(c.Writer, c.Request)
 	})
 
