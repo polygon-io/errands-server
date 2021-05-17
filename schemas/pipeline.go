@@ -105,7 +105,7 @@ func (p *Pipeline) RecalculateStatus() {
 			p.Status = StatusActive
 		}
 
-		if p.Status == StatusCompleted {
+		if errand.Status == StatusCompleted {
 			numCompleted++
 		}
 	}

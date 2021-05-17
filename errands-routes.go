@@ -223,18 +223,21 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 
 	procErrand = errands[0]
 
-	// We are processing this errand:
-	procErrand.Started = utils.GetTimestamp()
-	procErrand.Attempts += 1
-	procErrand.Status = "active"
-	procErrand.Progress = 0.0
-	_ = procErrand.AddToLogs("INFO", "Started!")
-	_ = s.saveErrand(&procErrand)
+	// We are processing this errand. This won't ever return error
+	updatedErrand, _ := s.UpdateErrandByID(procErrand.ID, func(errand *schemas.Errand) error {
+		errand.Started = utils.GetTimestamp()
+		errand.Attempts++
+		errand.Status = schemas.StatusActive
+		errand.Progress = 0.0
 
-	s.AddNotification("processing", &procErrand)
+		_ = errand.AddToLogs("INFO", "Started!")
+		return nil
+	})
+
+	s.AddNotification("processing", updatedErrand)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "OK",
-		"results": procErrand,
+		"results": updatedErrand,
 	})
 }
 
