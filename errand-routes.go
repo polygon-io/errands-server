@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	gin "github.com/gin-gonic/gin"
@@ -88,7 +89,7 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 			return err
 		}
 		errand.Failed = utils.GetTimestamp()
-		errand.Status = "failed"
+		errand.Status = schemas.StatusFailed
 		errand.Progress = 0
 		if errand.Options.Retries > 0 {
 			// If we should retry this errand:
@@ -148,7 +149,7 @@ func (s *ErrandsServer) completeErrand(c *gin.Context) {
 			return err
 		}
 		errand.Completed = utils.GetTimestamp()
-		errand.Status = "completed"
+		errand.Status = schemas.StatusCompleted
 		errand.Progress = 100
 		// errand.Results = compReq.Results
 		// If we should delete this errand upon completion:
@@ -263,7 +264,7 @@ func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) err
 
 	errand := errandObj.(schemas.Errand)
 	if err := fn(&errand); err != nil {
-		return nil, errors.New("error in given update function (fn)")
+		return nil, fmt.Errorf("error in given update function (fn): %w", err)
 	}
 
 	s.updateErrandInPipeline(&errand)

@@ -53,6 +53,7 @@ func (s *ErrandsServer) createPipeline(c *gin.Context) {
 	// Initialize all the errands in the pipeline
 	for _, errand := range pipeline.Errands {
 		errand.SetDefaults()
+		errand.PipelineID = pipeline.ID
 		errand.Status = schemas.StatusBlocked
 
 		if err := s.saveErrand(errand); err != nil {
