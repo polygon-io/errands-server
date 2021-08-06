@@ -27,15 +27,10 @@ var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, Statu
 type Errand struct {
 
 	// General Attributes:
-	ID      string `json:"id"`
-	Name    string `json:"name" binding:"required"`
-	Type    string `json:"type" binding:"required"`
-	Options struct {
-		TTL               int  `json:"ttl,omitempty"`
-		Retries           int  `json:"retries,omitempty"`
-		Priority          int  `json:"priority,omitempty"`
-		DeleteOnCompleted bool `json:"deleteOnCompleted,omitempty"`
-	} `json:"options"`
+	ID      string                 `json:"id"`
+	Name    string                 `json:"name" binding:"required"`
+	Type    string                 `json:"type" binding:"required"`
+	Options ErrandOptions          `json:"options"`
 	Data    map[string]interface{} `json:"data,omitempty"`
 	Created int64                  `json:"created"`
 	Status  Status                 `json:"status,omitempty"`
@@ -51,6 +46,15 @@ type Errand struct {
 
 	// PipelineID is the ID of the pipeline that this errand belongs to (if any)
 	PipelineID string `json:"pipeline,omitempty"`
+}
+
+// ErrandOptions holds various options tied to an errand.
+//easyjson:json
+type ErrandOptions struct {
+	TTL               int  `json:"ttl,omitempty"`
+	Retries           int  `json:"retries,omitempty"`
+	Priority          int  `json:"priority,omitempty"`
+	DeleteOnCompleted bool `json:"deleteOnCompleted,omitempty"`
 }
 
 //easyjson:json
