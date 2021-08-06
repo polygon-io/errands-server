@@ -369,7 +369,110 @@ func (v *Log) UnmarshalJSON(data []byte) error {
 func (v *Log) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas2(l, v)
 }
-func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(in *jlexer.Lexer, out *Errand) {
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(in *jlexer.Lexer, out *ErrandOptions) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "ttl":
+			out.TTL = int(in.Int())
+		case "retries":
+			out.Retries = int(in.Int())
+		case "priority":
+			out.Priority = int(in.Int())
+		case "deleteOnCompleted":
+			out.DeleteOnCompleted = bool(in.Bool())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(out *jwriter.Writer, in ErrandOptions) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if in.TTL != 0 {
+		const prefix string = ",\"ttl\":"
+		first = false
+		out.RawString(prefix[1:])
+		out.Int(int(in.TTL))
+	}
+	if in.Retries != 0 {
+		const prefix string = ",\"retries\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Retries))
+	}
+	if in.Priority != 0 {
+		const prefix string = ",\"priority\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Priority))
+	}
+	if in.DeleteOnCompleted {
+		const prefix string = ",\"deleteOnCompleted\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Bool(bool(in.DeleteOnCompleted))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ErrandOptions) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ErrandOptions) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ErrandOptions) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ErrandOptions) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(l, v)
+}
+func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas4(in *jlexer.Lexer, out *Errand) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -395,7 +498,7 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(in *jlexer.Le
 		case "type":
 			out.Type = string(in.String())
 		case "options":
-			easyjson2189435aDecode(in, &out.Options)
+			(out.Options).UnmarshalEasyJSON(in)
 		case "data":
 			if in.IsNull() {
 				in.Skip()
@@ -497,7 +600,7 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(out *jwriter.Writer, in Errand) {
+func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas4(out *jwriter.Writer, in Errand) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -519,7 +622,7 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(out *jwriter.
 	{
 		const prefix string = ",\"options\":"
 		out.RawString(prefix)
-		easyjson2189435aEncode(out, in.Options)
+		(in.Options).MarshalEasyJSON(out)
 	}
 	if len(in.Data) != 0 {
 		const prefix string = ",\"data\":"
@@ -631,112 +734,23 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v Errand) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(&w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Errand) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas3(w, v)
+	easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Errand) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(&r, v)
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Errand) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas3(l, v)
-}
-func easyjson2189435aDecode(in *jlexer.Lexer, out *struct {
-	TTL               int  `json:"ttl,omitempty"`
-	Retries           int  `json:"retries,omitempty"`
-	Priority          int  `json:"priority,omitempty"`
-	DeleteOnCompleted bool `json:"deleteOnCompleted,omitempty"`
-}) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "ttl":
-			out.TTL = int(in.Int())
-		case "retries":
-			out.Retries = int(in.Int())
-		case "priority":
-			out.Priority = int(in.Int())
-		case "deleteOnCompleted":
-			out.DeleteOnCompleted = bool(in.Bool())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson2189435aEncode(out *jwriter.Writer, in struct {
-	TTL               int  `json:"ttl,omitempty"`
-	Retries           int  `json:"retries,omitempty"`
-	Priority          int  `json:"priority,omitempty"`
-	DeleteOnCompleted bool `json:"deleteOnCompleted,omitempty"`
-}) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if in.TTL != 0 {
-		const prefix string = ",\"ttl\":"
-		first = false
-		out.RawString(prefix[1:])
-		out.Int(int(in.TTL))
-	}
-	if in.Retries != 0 {
-		const prefix string = ",\"retries\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.Retries))
-	}
-	if in.Priority != 0 {
-		const prefix string = ",\"priority\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.Priority))
-	}
-	if in.DeleteOnCompleted {
-		const prefix string = ",\"deleteOnCompleted\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Bool(bool(in.DeleteOnCompleted))
-	}
-	out.RawByte('}')
+	easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas4(l, v)
 }
