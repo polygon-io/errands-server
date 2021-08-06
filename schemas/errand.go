@@ -48,6 +48,7 @@ type Errand struct {
 	PipelineID string `json:"pipeline,omitempty"`
 }
 
+// ErrandOptions holds various options tied to an errand.
 //easyjson:json
 type ErrandOptions struct {
 	TTL               int  `json:"ttl,omitempty"`
