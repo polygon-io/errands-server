@@ -226,4 +226,34 @@ func TestPipelineValidate(t *testing.T) {
 
 		assert.NoError(t, p.Validate())
 	})
+
+	t.Run("single graph happy path | converging and diverging", func(t *testing.T) {
+		/*
+			A --> B --|        |--> E
+			          |--> C --|
+			      D --|        |--> F --> G
+		*/
+		p := Pipeline{
+			Name: "single graph with cycle",
+			Errands: []*Errand{
+				{Name: "A"},
+				{Name: "B"},
+				{Name: "C"},
+				{Name: "D"},
+				{Name: "E"},
+				{Name: "F"},
+				{Name: "G"},
+			},
+			Dependencies: []*PipelineDependency{
+				{Target: "B", DependsOn: "A"},
+				{Target: "C", DependsOn: "B"},
+				{Target: "C", DependsOn: "D"},
+				{Target: "E", DependsOn: "C"},
+				{Target: "F", DependsOn: "C"},
+				{Target: "G", DependsOn: "F"},
+			},
+		}
+
+		assert.NoError(t, p.Validate())
+	})
 }
