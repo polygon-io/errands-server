@@ -102,7 +102,7 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 	})
 }
 
-func failErrand(errand *schemas.Errand, failureRequest FailedRequest) error{
+func failErrand(errand *schemas.Errand, failureRequest FailedRequest) error {
 	// Update this errand attributes:
 	if err := errand.AddToLogs("ERROR", failureRequest.Reason); err != nil {
 		return err
@@ -295,4 +295,3 @@ func (s *ErrandsServer) UpdateErrandsByFilter(filter func(*schemas.Errand) bool,
 
 	return nil
 }
-

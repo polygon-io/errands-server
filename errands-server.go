@@ -105,7 +105,7 @@ func (s *ErrandsServer) periodicallyCheckTTLs() {
 			return false
 		}
 
-		started := time.Unix(0, errand.Started * 1_000_000) // ms to ns
+		started := time.Unix(0, errand.Started*1_000_000) // ms to ns
 		ttlDuration := time.Duration(errand.Options.TTL)
 
 		return time.Since(started) > ttlDuration
@@ -120,7 +120,7 @@ func (s *ErrandsServer) periodicallyCheckTTLs() {
 		return nil
 	}
 
-	for range t.C  {
+	for range t.C {
 		if err := s.UpdateErrandsByFilter(filter, update); err != nil {
 			log.WithError(err).Error("Unable to fail errand(s)")
 		}
