@@ -177,7 +177,7 @@ func (g dependencyGraph) checkForDependencyCycles() error {
 	}
 
 	// Prime the visit stack with the first independent errand and remove it from the list.
-	toVisitStack := independentErrands[0:1]
+	toVisitStack := []*Errand{independentErrands[0]}
 	independentErrands = independentErrands[1:]
 
 	// visitedSet keeps track of all the errands we've already seen so we can ensure we've seen all of them
