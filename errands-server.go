@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/polygon-io/ptime"
 	"net/http"
 	"path"
 	"reflect"
@@ -17,6 +16,7 @@ import (
 	binding "github.com/gin-gonic/gin/binding"
 	store "github.com/polygon-io/errands-server/memorydb"
 	schemas "github.com/polygon-io/errands-server/schemas"
+	"github.com/polygon-io/ptime"
 	validator "gopkg.in/go-playground/validator.v8"
 )
 
@@ -78,6 +78,8 @@ func NewErrandsServer(cfg *Config) *ErrandsServer {
 	}
 
 	go obj.periodicallySaveDB()
+
+	go obj.periodicallyCheckTTLs()
 
 	return obj
 }
