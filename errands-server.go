@@ -16,7 +16,6 @@ import (
 	binding "github.com/gin-gonic/gin/binding"
 	store "github.com/polygon-io/errands-server/memorydb"
 	schemas "github.com/polygon-io/errands-server/schemas"
-	"github.com/polygon-io/ptime"
 	validator "gopkg.in/go-playground/validator.v8"
 )
 
@@ -106,7 +105,7 @@ func (s *ErrandsServer) periodicallyCheckTTLs() {
 			return false
 		}
 
-		started := ptime.IMilliseconds(errand.Started).ToTime()
+		started := time.Unix(0, errand.Started * 1_000_000) // ms to ns
 		ttlDuration := time.Duration(errand.Options.TTL)
 
 		return time.Now().Sub(started) > ttlDuration
