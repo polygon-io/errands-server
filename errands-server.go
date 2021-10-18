@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/polygon-io/ptime"
 	"net/http"
 	"path"
 	"reflect"
@@ -90,6 +92,37 @@ func (s *ErrandsServer) periodicallySaveDB() {
 
 		log.Info("Checkpoint saving DB to file...")
 		s.saveDBs()
+	}
+}
+
+func (s *ErrandsServer) periodicallyCheckTTLs() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+
+	filter := func(errand *schemas.Errand) bool {
+		if errand.Options.TTL <= 0 {
+			return false
+		}
+
+		started := ptime.IMilliseconds(errand.Started).ToTime()
+		ttlDuration := time.Duration(errand.Options.TTL)
+
+		return time.Now().Sub(started) > ttlDuration
+	}
+
+	update := func(errand *schemas.Errand) error {
+		if err := failErrand(errand, FailedRequest{Reason: "TTL Expired"}); err != nil {
+			return fmt.Errorf("unable to fail errand: %s; %w", errand.ID, err)
+		}
+
+		s.AddNotification("failed", errand)
+		return nil
+	}
+
+	for range t.C  {
+		if err := s.UpdateErrandsByFilter(filter, update); err != nil {
+			log.WithError(err).Error("Unable to fail errand(s)")
+		}
 	}
 }
 
