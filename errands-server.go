@@ -105,8 +105,8 @@ func (s *ErrandsServer) periodicallyCheckTTLs() {
 			return false
 		}
 
-		started := time.Unix(0, errand.Started*1_000_000) // ms to ns
-		ttlDuration := time.Duration(errand.Options.TTL)
+		started := time.Unix(0, errand.Started*1_000_000)                     // ms to ns
+		ttlDuration := time.Duration(errand.Options.TTL * 60 * 1_000_000_000) // m to ns
 
 		return time.Since(started) > ttlDuration
 	}
