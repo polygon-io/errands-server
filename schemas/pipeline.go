@@ -170,8 +170,8 @@ func (g dependencyGraph) findUnblockedErrands() []*Errand {
 }
 
 // checkForDependencyCycles returns an error if it finds a cyclic dependency in the dependencyGraph.
-// The implementation is simple: Run a full depth first traversal of the graph for each node.
-// More precisely: For each node N, perform a depth first traversal of G starting at N.
+// It determines cycles by doing the following:
+// For each node N, perform a depth first traversal of G starting at N.
 // If we ever encounter N again during the traversal, we've detected a cycle.
 func (g dependencyGraph) checkForDependencyCycles() error {
 	independentErrands := g.findUnblockedErrands()
