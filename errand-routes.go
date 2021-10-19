@@ -84,27 +84,7 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 	}
 
 	updatedErrand, err := s.UpdateErrandByID(c.Param("id"), func(errand *schemas.Errand) error {
-		// Update this errand attributes:
-		if err := errand.AddToLogs("ERROR", failedReq.Reason); err != nil {
-			return err
-		}
-		errand.Failed = utils.GetTimestamp()
-		errand.Status = schemas.StatusFailed
-		errand.Progress = 0
-		if errand.Options.Retries > 0 {
-			// If we should retry this errand:
-			if errand.Attempts <= errand.Options.Retries {
-				errand.Status = inactive
-			} else {
-				// If this errand is out of retries
-				metrics.ErrandFailed(errand.Type)
-			}
-		} else {
-			// If this errand was not configured with retries
-			metrics.ErrandFailed(errand.Type)
-		}
-
-		return nil
+		return failErrand(errand, failedReq)
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -120,6 +100,30 @@ func (s *ErrandsServer) failedErrand(c *gin.Context) {
 		"status":  "OK",
 		"results": updatedErrand,
 	})
+}
+
+func failErrand(errand *schemas.Errand, failureRequest FailedRequest) error {
+	// Update this errand attributes:
+	if err := errand.AddToLogs("ERROR", failureRequest.Reason); err != nil {
+		return err
+	}
+	errand.Failed = utils.GetTimestamp()
+	errand.Status = schemas.StatusFailed
+	errand.Progress = 0
+	if errand.Options.Retries > 0 {
+		// If we should retry this errand:
+		if errand.Attempts <= errand.Options.Retries {
+			errand.Status = inactive
+		} else {
+			// If this errand is out of retries
+			metrics.ErrandFailed(errand.Type)
+		}
+	} else {
+		// If this errand was not configured with retries
+		metrics.ErrandFailed(errand.Type)
+	}
+
+	return nil
 }
 
 type CompletedRequest struct {
@@ -256,14 +260,14 @@ func (s *ErrandsServer) deleteErrandByID(id string) {
 }
 
 // UpdateErrandByID Lets you pass in a function which will be called allowing you to update the errand. If no error is returned, the errand will be saved in the DB with the new attributes.
-func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) error) (*schemas.Errand, error) {
+func (s *ErrandsServer) UpdateErrandByID(id string, update func(*schemas.Errand) error) (*schemas.Errand, error) {
 	errandObj, found := s.ErrandStore.Get(id)
 	if !found {
 		return nil, errors.New("errand with this ID not found")
 	}
 
 	errand := errandObj.(schemas.Errand)
-	if err := fn(&errand); err != nil {
+	if err := update(&errand); err != nil {
 		return nil, fmt.Errorf("error in given update function (fn): %w", err)
 	}
 
@@ -272,4 +276,22 @@ func (s *ErrandsServer) UpdateErrandByID(id string, fn func(*schemas.Errand) err
 	s.ErrandStore.SetDefault(id, errand)
 
 	return &errand, nil
+}
+
+func (s *ErrandsServer) UpdateErrandsByFilter(filter func(*schemas.Errand) bool, update func(*schemas.Errand) error) error {
+	for _, itemObj := range s.ErrandStore.Items() {
+		errand := itemObj.Object.(schemas.Errand)
+
+		if filter(&errand) {
+			if err := update(&errand); err != nil {
+				return fmt.Errorf("error in given update function (fn): %w", err)
+			}
+
+			s.updateErrandInPipeline(&errand)
+
+			s.ErrandStore.SetDefault(errand.ID, errand)
+		}
+	}
+
+	return nil
 }

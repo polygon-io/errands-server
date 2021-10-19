@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"path"
 	"reflect"
@@ -77,6 +78,8 @@ func NewErrandsServer(cfg *Config) *ErrandsServer {
 
 	go obj.periodicallySaveDB()
 
+	go obj.periodicallyCheckTTLs()
+
 	return obj
 }
 
@@ -90,6 +93,37 @@ func (s *ErrandsServer) periodicallySaveDB() {
 
 		log.Info("Checkpoint saving DB to file...")
 		s.saveDBs()
+	}
+}
+
+func (s *ErrandsServer) periodicallyCheckTTLs() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+
+	filter := func(errand *schemas.Errand) bool {
+		if errand.Options.TTL <= 0 {
+			return false
+		}
+
+		started := time.Unix(0, errand.Started*1_000_000)              // ms to ns
+		ttlDuration := time.Duration(errand.Options.TTL) * time.Minute // m to ns
+
+		return time.Since(started) > ttlDuration
+	}
+
+	update := func(errand *schemas.Errand) error {
+		if err := failErrand(errand, FailedRequest{Reason: "TTL Expired"}); err != nil {
+			return fmt.Errorf("unable to fail errand: %s; %w", errand.ID, err)
+		}
+
+		s.AddNotification("failed", errand)
+		return nil
+	}
+
+	for range t.C {
+		if err := s.UpdateErrandsByFilter(filter, update); err != nil {
+			log.WithError(err).Error("Unable to fail errand(s)")
+		}
 	}
 }
 

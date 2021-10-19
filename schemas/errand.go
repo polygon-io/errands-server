@@ -3,7 +3,6 @@ package schemas
 
 import (
 	"fmt"
-
 	"github.com/google/uuid"
 
 	"github.com/polygon-io/errands-server/utils"
@@ -51,6 +50,7 @@ type Errand struct {
 // ErrandOptions holds various options tied to an errand.
 //easyjson:json
 type ErrandOptions struct {
+	// TTL is measured in minutes.
 	TTL               int  `json:"ttl,omitempty"`
 	Retries           int  `json:"retries,omitempty"`
 	Priority          int  `json:"priority,omitempty"`
