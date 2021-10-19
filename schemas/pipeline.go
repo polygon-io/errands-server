@@ -179,43 +179,34 @@ func (g dependencyGraph) checkForDependencyCycles() error {
 		return fmt.Errorf("dependency cycle found; all errands have dependencies")
 	}
 
-	allErrands := make([]*Errand, 0, len(g.errands))
-	for _, errand := range g.errands {
-		allErrands = append(allErrands, errand)
-	}
+	for _, currentHomeErrand := range g.errands {
+		toVisitStack := []*Errand{currentHomeErrand}
+		currentTreeVisitedSet := make(map[string]struct{}, len(g.dependencyToDependents))
 
-	// Prime the visit stack with the current home errand (N).
-	currentHomeErrand := allErrands[0]
-	toVisitStack := []*Errand{currentHomeErrand}
-	nextIndex := 1
+		// While we have nodes to visit, keep traversing
+		for len(toVisitStack) > 0 {
+			topOfStackIndex := len(toVisitStack) - 1
+			errand := toVisitStack[topOfStackIndex]
+			toVisitStack = toVisitStack[:topOfStackIndex] // Pop off the last value from the stack
 
-	// currentTreeVisitedSet keeps track of the errands we've seen in the tree traversal starting at 'currentHomeErrand'
-	// This set gets cleared every time we finish a traversal and move on to the next node.
-	currentTreeVisitedSet := make(map[string]struct{}, len(g.dependencyToDependents))
+			// If we've seen this node before, we may have detected a cycle.
+			if _, exists := currentTreeVisitedSet[errand.Name]; exists {
+				// If the errand we've seen before is the currentHomeErrand then we know for certain
+				// that we found a cycle.
+				if errand.Name == currentHomeErrand.Name {
+					return fmt.Errorf("dependency cycle found involving '%s'", errand.Name)
+				}
 
-	for len(toVisitStack) > 0 {
-		topOfStackIndex := len(toVisitStack) - 1
-		errand := toVisitStack[topOfStackIndex]
-		toVisitStack = toVisitStack[:topOfStackIndex] // Pop off the last value from the stack
+				// If we've already visited this node, but it's not the start node, we _might_ have
+				// found a cycle, but we can't be sure until we traverse starting from that node.
+				// Until then, don't continue to add dependencies from this duplicate node to the visit stack.
+			} else {
+				// If we haven't seen this node before, Add add it to the visited set
+				currentTreeVisitedSet[errand.Name] = struct{}{}
 
-		// If we've made it back to the current path's start index, we've found a cycle.
-		if _, exists := currentTreeVisitedSet[errand.Name]; exists && errand.Name == currentHomeErrand.Name {
-			return fmt.Errorf("dependency cycle found involving '%s'", errand.Name)
-		}
-
-		// Add this errand to the visited set
-		currentTreeVisitedSet[errand.Name] = struct{}{}
-
-		// Add all of this errand's dependencies to the visit stack
-		toVisitStack = append(toVisitStack, g.dependencyToDependents[errand.Name]...)
-
-		// If our visit stack is empty, we've exhausted the nodes in this tree without finding a cycle.
-		// If there are more nodes to traverse from, reset and go again.
-		if len(toVisitStack) == 0 && nextIndex < len(allErrands) {
-			currentHomeErrand = allErrands[nextIndex]
-			toVisitStack = []*Errand{currentHomeErrand}
-			currentTreeVisitedSet = make(map[string]struct{})
-			nextIndex++
+				// Add all of this errand's dependencies to the visit stack
+				toVisitStack = append(toVisitStack, g.dependencyToDependents[errand.Name]...)
+			}
 		}
 	}
 
