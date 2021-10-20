@@ -170,64 +170,44 @@ func (g dependencyGraph) findUnblockedErrands() []*Errand {
 }
 
 // checkForDependencyCycles returns an error if it finds a cyclic dependency in the dependencyGraph.
+// It determines cycles by doing the following:
+// For each node N, perform a depth first traversal of G starting at N.
+// If we ever encounter N again during the traversal, we've detected a cycle.
 func (g dependencyGraph) checkForDependencyCycles() error {
 	independentErrands := g.findUnblockedErrands()
 	if len(independentErrands) == 0 {
 		return fmt.Errorf("dependency cycle found; all errands have dependencies")
 	}
 
-	// Prime the visit stack with the first independent errand and remove it from the list.
-	toVisitStack := []*Errand{independentErrands[0]}
-	independentErrands = independentErrands[1:]
+	for _, currentHomeErrand := range g.errands {
+		toVisitStack := []*Errand{currentHomeErrand}
+		currentTreeVisitedSet := make(map[string]struct{}, len(g.dependencyToDependents))
 
-	// visitedSet keeps track of all the errands we've already seen so we can ensure we've seen all of them
-	visitedSet := make(map[string]struct{}, len(g.dependencyToDependents))
+		// While we have nodes to visit, keep traversing
+		for len(toVisitStack) > 0 {
+			topOfStackIndex := len(toVisitStack) - 1
+			errand := toVisitStack[topOfStackIndex]
+			toVisitStack = toVisitStack[:topOfStackIndex] // Pop off the last value from the stack
 
-	// currentTreeVisitedSet keeps track of the errands we've seen in the current tree traversal.
-	// This set gets cleared if we run out of errands in a tree and have to start at a new root node.
-	// It's possible that two trees share some nodes without forming a cycle.
-	// For example, consider this graph:
-	//
-	// A --> B --|
-	//           |--> C --> E
-	//       D --|
-	//
-	// Both A and D are root nodes whose trees both contain C and E, however they are not in a cycle.
-	currentTreeVisitedSet := make(map[string]struct{}, len(g.dependencyToDependents))
+			// If we've seen this node before, we may have detected a cycle.
+			if _, exists := currentTreeVisitedSet[errand.Name]; exists {
+				// If the errand we've seen before is the currentHomeErrand then we know for certain
+				// that we found a cycle.
+				if errand.Name == currentHomeErrand.Name {
+					return fmt.Errorf("dependency cycle found involving '%s'", errand.Name)
+				}
 
-	for len(toVisitStack) > 0 {
-		topOfStackIndex := len(toVisitStack) - 1
-		errand := toVisitStack[topOfStackIndex]
-		toVisitStack = toVisitStack[:topOfStackIndex] // Pop off the last value from the stack
+				// If we've already visited this node, but it's not the start node, we _might_ have
+				// found a cycle, but we can't be sure until we traverse starting from that node.
+				// Until then, don't continue to add dependencies from this duplicate node to the visit stack.
+			} else {
+				// If we haven't seen this node before, Add add it to the visited set
+				currentTreeVisitedSet[errand.Name] = struct{}{}
 
-		// If we've seen this errand already in this tree, we found a cycle!
-		if _, exists := currentTreeVisitedSet[errand.Name]; exists {
-			return fmt.Errorf("dependency cycle found involving '%s'", errand.Name)
+				// Add all of this errand's dependencies to the visit stack
+				toVisitStack = append(toVisitStack, g.dependencyToDependents[errand.Name]...)
+			}
 		}
-
-		// Add this errand to the visitedSet
-		visitedSet[errand.Name] = struct{}{}
-		currentTreeVisitedSet[errand.Name] = struct{}{}
-
-		// Add all of this errand's dependencies to the visit stack
-		toVisitStack = append(toVisitStack, g.dependencyToDependents[errand.Name]...)
-
-		// If our visit stack is empty, we've exhausted the nodes in this tree without finding a cycle.
-		// If we have more independent (root) errands, add the next one to the visit stack and reset our current tree visited set.
-		if len(toVisitStack) == 0 && len(independentErrands) > 0 {
-			toVisitStack = independentErrands[0:1]
-			independentErrands = independentErrands[1:]
-			currentTreeVisitedSet = make(map[string]struct{})
-		}
-	}
-
-	// If we visited fewer nodes than there were in the graph, it means our independent nodes didn't
-	// lead us everywhere. That's only possible if there's a strongly connected component in the graph somewhere.
-	// Consider the example: A <--> B   C
-	// In this graph, C is the only independent errand and has no connection to A or C,
-	// Neither A nor B are independent so we'll never visit them.
-	if len(visitedSet) < len(g.dependencyToDependents) {
-		return fmt.Errorf("dependency cycle found; there is a strongly connected subgraph which was not visited")
 	}
 
 	return nil
