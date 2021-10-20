@@ -101,7 +101,7 @@ func (s *ErrandsServer) periodicallyCheckTTLs() {
 	defer t.Stop()
 
 	filter := func(errand *schemas.Errand) bool {
-		if errand.Options.TTL <= 0 {
+		if errand.Options.TTL <= 0 || errand.Status != schemas.StatusActive {
 			return false
 		}
 
