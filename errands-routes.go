@@ -223,7 +223,6 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 
 	procErrand = errands[0]
 
-	// We are processing this errand. This won't ever return error
 	updatedErrand, err := s.UpdateErrandByID(procErrand.ID, func(errand *schemas.Errand) error {
 		errand.Started = utils.GetTimestamp()
 		errand.Attempts++
