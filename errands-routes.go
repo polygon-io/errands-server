@@ -224,7 +224,7 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 	procErrand = errands[0]
 
 	// We are processing this errand. This won't ever return error
-	updatedErrand, _ := s.UpdateErrandByID(procErrand.ID, func(errand *schemas.Errand) error {
+	updatedErrand, err := s.UpdateErrandByID(procErrand.ID, func(errand *schemas.Errand) error {
 		errand.Started = utils.GetTimestamp()
 		errand.Attempts++
 		errand.Status = schemas.StatusActive
@@ -233,6 +233,15 @@ func (s *ErrandsServer) processErrand(c *gin.Context) {
 		_ = errand.AddToLogs("INFO", "Started!")
 		return nil
 	})
+
+	if err != nil {
+		log.WithError(err).Warn("potentially no job found")
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "No jobs",
+		})
+		return
+	}
 
 	s.AddNotification("processing", updatedErrand)
 	c.JSON(http.StatusOK, gin.H{
