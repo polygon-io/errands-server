@@ -215,7 +215,7 @@ func (s *ErrandsServer) createAPI() {
 	// Singular errand Routes:
 	s.ErrandRoutes = s.API.Group("/v1/errand")
 	// Get an errand by id:
-	s.ErrandRoutes.GET("/:id", s.createErrand)
+	s.ErrandRoutes.GET("/:id", s.getErrand)
 	// Delete an errand by id:
 	s.ErrandRoutes.DELETE("/:id", s.deleteErrand)
 	// Update an errand by id:
