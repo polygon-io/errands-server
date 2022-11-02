@@ -1,8 +1,9 @@
-// Schemas provides model schemas for the errand server.
+// Package schemas provides model schemas for the errand server.
 package schemas
 
 import (
 	"fmt"
+
 	"github.com/google/uuid"
 
 	"github.com/polygon-io/errands-server/utils"
@@ -48,6 +49,7 @@ type Errand struct {
 }
 
 // ErrandOptions holds various options tied to an errand.
+//
 //easyjson:json
 type ErrandOptions struct {
 	// TTL is measured in minutes.

@@ -198,6 +198,7 @@ func UserStructLevelValidation(v *validator.Validate, structLevel *validator.Str
 	}
 }
 
+//nolint:funlen // 8 Lines over, but this has all our routes
 func (s *ErrandsServer) createAPI() {
 	s.API = gin.Default()
 
@@ -258,8 +259,9 @@ func (s *ErrandsServer) createAPI() {
 	})
 
 	s.Server = &http.Server{
-		Addr:    s.Port,
-		Handler: s.API,
+		Addr:              s.Port,
+		Handler:           s.API,
+		ReadHeaderTimeout: time.Second * 30,
 	}
 
 	log.Println("Starting server on port:", s.Port)

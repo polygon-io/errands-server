@@ -185,6 +185,7 @@ func (s *ErrandsServer) updateFilteredErrands(c *gin.Context) {
 	})
 }
 
+//nolint:funlen // Only 1 line over
 func (s *ErrandsServer) processErrand(c *gin.Context) {
 	var procErrand schemas.Errand
 
