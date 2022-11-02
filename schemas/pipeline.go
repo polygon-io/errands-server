@@ -9,6 +9,7 @@ import (
 
 // Pipeline represents an errand pipeline which consists of errands and dependencies between them.
 // Cyclic dependencies are not allowed.
+//
 //easyjson:json
 type Pipeline struct {
 	Name              string `json:"name" binding:"required"`
@@ -27,6 +28,7 @@ type Pipeline struct {
 }
 
 // PipelineDependency describes a dependency between errands within a pipeline.
+//
 //easyjson:json
 type PipelineDependency struct {
 	// Target is the name of the errand within the pipeline that this dependency relates to

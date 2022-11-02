@@ -255,6 +255,18 @@ func (s *ErrandsServer) deleteErrand(c *gin.Context) {
 	})
 }
 
+func (s *ErrandsServer) getErrand(c *gin.Context) {
+	errandObj, found := s.ErrandStore.Get(c.Param("id"))
+	if !found {
+		c.JSON(http.StatusNotFound, nil)
+	}
+	errand := errandObj.(schemas.Errand)
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "OK",
+		"results": errand,
+	})
+}
+
 func (s *ErrandsServer) deleteErrandByID(id string) {
 	s.ErrandStore.Delete(id)
 }

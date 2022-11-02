@@ -1,4 +1,4 @@
-// Package Utils provides basic utilities for the errand server.
+// Package utils provides basic utilities for the errand server.
 package utils
 
 import (

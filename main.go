@@ -9,16 +9,14 @@ import (
 )
 
 /*
+Config is
+ENVIRONMENT VARIABLES:
+-----------------------------
+Set values via env variables, prefixed with ERRANDS_
+eg:
 
-	ENVIRONMENT VARIABLES:
-	-----------------------------
-	Set values via env variables, prefixed with ERRANDS_
-	eg:
-
-		ERRANDS_PORT=:4545 - Will change the listening port to 4545
-		ERRANDS_STORAGE="/errands/" - Will change the DB location to /errands/
-
-
+	ERRANDS_PORT=:4545 - Will change the listening port to 4545
+	ERRANDS_STORAGE="/errands/" - Will change the DB location to /errands/
 */
 type Config struct {
 	Storage string `split_words:"true" default:"./errands.db"`

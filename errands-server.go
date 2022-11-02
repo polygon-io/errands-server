@@ -198,6 +198,7 @@ func UserStructLevelValidation(v *validator.Validate, structLevel *validator.Str
 	}
 }
 
+//nolint:funlen // 8 Lines over, but this has all our routes
 func (s *ErrandsServer) createAPI() {
 	s.API = gin.Default()
 
@@ -215,7 +216,7 @@ func (s *ErrandsServer) createAPI() {
 	// Singular errand Routes:
 	s.ErrandRoutes = s.API.Group("/v1/errand")
 	// Get an errand by id:
-	s.ErrandRoutes.GET("/:id", s.createErrand)
+	s.ErrandRoutes.GET("/:id", s.getErrand)
 	// Delete an errand by id:
 	s.ErrandRoutes.DELETE("/:id", s.deleteErrand)
 	// Update an errand by id:
@@ -258,8 +259,9 @@ func (s *ErrandsServer) createAPI() {
 	})
 
 	s.Server = &http.Server{
-		Addr:    s.Port,
-		Handler: s.API,
+		Addr:              s.Port,
+		Handler:           s.API,
+		ReadHeaderTimeout: time.Second * 30,
 	}
 
 	log.Println("Starting server on port:", s.Port)

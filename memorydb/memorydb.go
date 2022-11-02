@@ -1,4 +1,4 @@
-// Memorydb provides a key value store.
+// Package memorydb provides a key value store.
 package memorydb
 
 import (
