@@ -563,7 +563,7 @@ func easyjson2189435aDecodeGithubComPolygonIoErrandsServerSchemas4(in *jlexer.Le
 			out.Started = int64(in.Int64())
 		case "failed":
 			out.Failed = int64(in.Int64())
-		case "compelted":
+		case "completed":
 			out.Completed = int64(in.Int64())
 		case "logs":
 			if in.IsNull() {
@@ -705,7 +705,7 @@ func easyjson2189435aEncodeGithubComPolygonIoErrandsServerSchemas4(out *jwriter.
 		out.Int64(int64(in.Failed))
 	}
 	if in.Completed != 0 {
-		const prefix string = ",\"compelted\":"
+		const prefix string = ",\"completed\":"
 		out.RawString(prefix)
 		out.Int64(int64(in.Completed))
 	}
