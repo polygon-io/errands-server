@@ -21,6 +21,8 @@ const (
 )
 
 // ErrandStatuses is a slice of all valid statuses.
+//
+//nolint:gochecknoglobals // These are readonly.
 var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, StatusFailed, StatusCompleted}
 
 //easyjson:json
