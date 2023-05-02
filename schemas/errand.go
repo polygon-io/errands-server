@@ -21,6 +21,8 @@ const (
 )
 
 // ErrandStatuses is a slice of all valid statuses.
+//
+//nolint:gochecknoglobals // These are readonly.
 var ErrandStatuses = []Status{StatusBlocked, StatusInactive, StatusActive, StatusFailed, StatusCompleted}
 
 //easyjson:json
@@ -41,7 +43,7 @@ type Errand struct {
 	Attempts  int     `json:"attempts"`
 	Started   int64   `json:"started,omitempty"`   // Timestamp of last Start
 	Failed    int64   `json:"failed,omitempty"`    // Timestamp of last Fail
-	Completed int64   `json:"compelted,omitempty"` // Timestamp of last Fail
+	Completed int64   `json:"completed,omitempty"` // Timestamp of last Fail
 	Logs      []Log   `json:"logs,omitempty"`
 
 	// PipelineID is the ID of the pipeline that this errand belongs to (if any)
