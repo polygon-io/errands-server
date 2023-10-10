@@ -8,41 +8,41 @@ platform:
   arch: amd64
 
 steps:
-- name: vet
-  image: golang:1.14
-  commands:
-  - go vet ./...
-  volumes:
-  - name: deps
-    path: /go/pkg
-
-- name: lint
-  pull: always
-  image: polygonio/go-linter:v1.13
-  environment:
-    ADDITIONAL_ARGS: --new-from-rev 86548ee1cf5f1478bdd5ee285a2dd0d6f8406c76
-  volumes:
-  - name: deps
-    path: /go/pkg
-
-- name: easyjson
-  image: polygonio/tool-serialization:latest
-  commands:
-    - ./_bin_/check_easyjson
-  volumes:
+  - name: vet
+    image: golang:1.14
+    commands:
+    - go vet ./...
+    volumes:
     - name: deps
       path: /go/pkg
 
-- name: test
-  image: golang:1.14
-  commands:
-  - go test -v ./...
-  environment:
-    CGO_ENABLED: 0
-    GOOS: linux
-  volumes:
-  - name: deps
-    path: /go/pkg
+  - name: lint
+    pull: always
+    image: polygonio/go-linter:v1.13
+    environment:
+      ADDITIONAL_ARGS: --new-from-rev 86548ee1cf5f1478bdd5ee285a2dd0d6f8406c76
+    volumes:
+    - name: deps
+      path: /go/pkg
+
+  - name: easyjson
+    image: polygonio/tool-serialization:latest
+    commands:
+      - ./_bin_/check_easyjson
+    volumes:
+      - name: deps
+        path: /go/pkg
+
+  - name: test
+    image: golang:1.14
+    commands:
+    - go test -v ./...
+    environment:
+      CGO_ENABLED: 0
+      GOOS: linux
+    volumes:
+    - name: deps
+      path: /go/pkg
 
 
 
