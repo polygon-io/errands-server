@@ -7,9 +7,21 @@ spec:
   groups:
     - name: errands-server
       rules:
-        - alert: Process DXFeed Errand Failure
+        - alert: Errand Failures
           annotations:
             message: Errand failed to complete successfully.
+            runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
+            dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
+          expr: |
+            count(rate(poly_errands_completed_total{status="failed"}[24h])) > 0
+          for: 24h
+          labels:
+            experimental: "true"
+            severity: warning
+            service_group: apps
+        - alert: Process DXFeed Errand Failure
+          annotations:
+            message: Process DXFeed to csv errand failed to complete successfully.
             runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
             dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
           expr: |
@@ -17,5 +29,41 @@ spec:
           for: 24h
           labels:
             experimental: "true"
-            severity: warning
+            severity: critical
+            service_group: apps
+        - alert: Sort Split DXFeed Errand Failure
+          annotations:
+            message: DXFeed sort split errand failed to complete successfully.
+            runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
+            dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
+          expr: |
+            count(rate(poly_errands_completed_total{errand_type="dxfeed-split-sort", status="failed"}[24h])) > 0
+          for: 24h
+          labels:
+            experimental: "true"
+            severity: critical
+            service_group: apps
+        - alert:  PCAP to PPARC DXFeed Errand Failure
+          annotations:
+            message: PCAP to PPARC errand failed to complete successfully.
+            runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
+            dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
+          expr: |
+            count(rate(poly_errands_completed_total{errand_type="pcap-to-pparc", status="failed"}[24h])) > 0
+          for: 24h
+          labels:
+            experimental: "true"
+            severity: critical
+            service_group: apps
+        - alert: PPARC Sorter Errand Failure
+          annotations:
+            message: PPARC Sorter errand failed to complete successfully.
+            runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
+            dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
+          expr: |
+            count(rate(poly_errands_completed_total{errand_type="pparc-sorter", status="failed"}[24h])) > 0
+          for: 24h
+          labels:
+            experimental: "true"
+            severity: critical
             service_group: apps
