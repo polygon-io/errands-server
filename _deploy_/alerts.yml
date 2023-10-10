@@ -7,13 +7,13 @@ spec:
   groups:
     - name: errands-server
       rules:
-        - alert: Errand Failure
+        - alert: Process DXFeed Errand Failure
           annotations:
             message: Errand failed to complete successfully.
             runbook_url: https://github.com/polygon-io/backend/wiki/%5BRunbook%5D-Errand-Failure
             dashboard_url: https://grafana.internal.polygon.io/d/vs_XdP9Vz/errands?orgId=1&viewPanel=2
           expr: |
-            sum by(errand_type) (rate(poly_errands_completed_total{status="failed"}[$__rate_interval]))
+            count(rate(poly_errands_completed_total{errand_type="process-dxfeed-csv", status="failed"}[24h])) > 0
           for: 24h
           labels:
             experimental: "true"
