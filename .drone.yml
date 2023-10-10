@@ -44,6 +44,8 @@ steps:
   - name: deps
     path: /go/pkg
 
+
+
 volumes:
 - name: deps
   temp: {}
@@ -81,6 +83,18 @@ steps:
       username:
         from_secret: dockerhub_username
 
+  - name: deploy alerts
+    image: polygonio/drone-kube
+    settings:
+      template: _deploy_/alerts.yml
+      namespace: errands
+      ca:
+        from_secret: KUBE_CA_STAGING
+      server:
+        from_secret: KUBE_SERVER_STAGING
+      token:
+        from_secret: KUBE_TOKEN_STAGING
+
 trigger:
   branch:
     - master
@@ -112,6 +126,18 @@ steps:
         - ${DRONE_TAG}
       username:
         from_secret: dockerhub_username
+
+  - name: deploy alerts
+    image: polygonio/drone-kube
+    settings:
+      template: _deploy_/alerts.yml
+      namespace: errands
+      ca:
+        from_secret: KUBE_CA
+      server:
+        from_secret: KUBE_SERVER
+      token:
+        from_secret: KUBE_TOKEN
 
 trigger:
   event:
