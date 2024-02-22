@@ -5,7 +5,6 @@ import (
 	"os/signal"
 
 	envconfig "github.com/kelseyhightower/envconfig"
-	_ "github.com/mailru/easyjson/easyjson"
 	log "github.com/sirupsen/logrus"
 )
 
